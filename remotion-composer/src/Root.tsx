@@ -190,6 +190,10 @@ export const Root: React.FC = () => {
           fontSize: 52,
           highlightColor: "#22D3EE",
         }}
+        calculateMetadata={({ props }) => {
+          const seconds = Number(props.durationInSeconds);
+          return seconds > 0 ? { durationInFrames: Math.round(seconds * 30) } : {};
+        }}
       />
       <Composition
         id="TitledVideo"
