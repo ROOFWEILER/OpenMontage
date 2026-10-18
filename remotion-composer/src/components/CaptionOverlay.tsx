@@ -16,6 +16,8 @@ export interface WordCaption {
   // Force a page break after this word (e.g. sentence or scene boundaries).
   // Useful for CJK captions where pages should align with clause boundaries.
   pageBreakAfter?: boolean;
+  // With highlightMode="emphasis", only words flagged here get highlightColor.
+  emphasis?: boolean;
 }
 
 type CaptionOverlayProps = {
@@ -30,6 +32,11 @@ type CaptionOverlayProps = {
   // Separator rendered between words. Space-delimited languages want the
   // default " "; CJK languages (no inter-word spacing) should pass "".
   wordSeparator?: string;
+  // Distance from frame bottom to the caption block, in px. Default 80.
+  bottomOffset?: number;
+  // "karaoke" (default) highlights the word being spoken; "emphasis" shows the
+  // whole phrase in `color` and highlights only words with emphasis: true.
+  highlightMode?: "karaoke" | "emphasis";
 };
 
 interface CaptionPage {
@@ -66,7 +73,9 @@ const PageRenderer: React.FC<{
   backgroundColor: string;
   fontFamily: string;
   wordSeparator: string;
-}> = ({ page, fontSize, color, highlightColor, backgroundColor, fontFamily, wordSeparator }) => {
+  bottomOffset: number;
+  highlightMode: "karaoke" | "emphasis";
+}> = ({ page, fontSize, color, highlightColor, backgroundColor, fontFamily, wordSeparator, bottomOffset, highlightMode }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -84,7 +93,7 @@ const PageRenderer: React.FC<{
       style={{
         justifyContent: "flex-end",
         alignItems: "center",
-        paddingBottom: 80,
+        paddingBottom: bottomOffset,
       }}
     >
       <div
@@ -108,8 +117,11 @@ const PageRenderer: React.FC<{
           }}
         >
           {page.words.map((w, i) => {
-            const isActive = w.startMs <= currentMs && w.endMs > currentMs;
-            const isPast = w.endMs <= currentMs;
+            const emphasisMode = highlightMode === "emphasis";
+            const isActive = emphasisMode
+              ? !!w.emphasis
+              : w.startMs <= currentMs && w.endMs > currentMs;
+            const isPast = emphasisMode || w.endMs <= currentMs;
             return (
               <Fragment key={`${w.startMs}-${i}`}>
                 <span
@@ -147,6 +159,8 @@ export const CaptionOverlay: React.FC<CaptionOverlayProps> = ({
   backgroundColor = "rgba(15, 23, 42, 0.75)",
   fontFamily = "Space Grotesk, Inter, system-ui, sans-serif",
   wordSeparator = " ",
+  bottomOffset = 80,
+  highlightMode = "karaoke",
 }) => {
   const { fps } = useVideoConfig();
   const pages = buildPages(words, wordsPerPage);
@@ -171,6 +185,8 @@ export const CaptionOverlay: React.FC<CaptionOverlayProps> = ({
               backgroundColor={backgroundColor}
               fontFamily={fontFamily}
               wordSeparator={wordSeparator}
+              bottomOffset={bottomOffset}
+              highlightMode={highlightMode}
             />
           </Sequence>
         );
