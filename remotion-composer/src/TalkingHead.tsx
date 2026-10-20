@@ -19,6 +19,12 @@ import { KPIGrid } from "./components/charts/KPIGrid";
 import { HeroTitle } from "./components/HeroTitle";
 import { SectionTitle } from "./components/SectionTitle";
 import { StatReveal } from "./components/StatReveal";
+import { PhoneMockup } from "./components/stylepack/PhoneMockup";
+import { UIWorld, UIWorldCard } from "./components/stylepack/UIWorld";
+import { Checklist } from "./components/stylepack/Checklist";
+import { ChartGrow } from "./components/stylepack/ChartGrow";
+import { TextBehind } from "./components/stylepack/TextBehind";
+import { StyleTokens } from "./components/stylepack/shared";
 
 // ---------------------------------------------------------------------------
 // Overlay types for talking-head video
@@ -57,6 +63,25 @@ export interface TalkingHeadOverlay {
   showLegend?: boolean;
   showMarkers?: boolean;
   columns?: 2 | 3 | 4;
+  // Style-pack effects (phone_mockup, ui_world, checklist, chart_grow, text_behind)
+  screenSrc?: string;
+  mockupSrc?: string;
+  side?: "left" | "right" | "center";
+  label?: string;
+  scrollFraction?: number;
+  tapAt?: [number, number];
+  tapAtSeconds?: number;
+  cards?: UIWorldCard[];
+  items?: string[];
+  itemSeconds?: number[];
+  headline?: string;
+  valuePrefix?: string;
+  valueSuffix?: string;
+  highlightIndex?: number;
+  placement?: "lower" | "center" | "upper";
+  top?: number;
+  /** "behind" = between the background video and the presenter matte. */
+  layer?: "behind" | "front";
   // Styling
   backgroundColor?: string;
   color?: string;
@@ -110,10 +135,58 @@ const POSITION_STYLES: Record<string, React.CSSProperties> = {
 // Overlay component dispatcher — maps overlay type to Remotion component
 // ---------------------------------------------------------------------------
 
-const OverlayContent: React.FC<{ overlay: TalkingHeadOverlay }> = ({
+const STYLE_PACK_TYPES = ["phone_mockup", "ui_world", "checklist", "chart_grow", "text_behind"];
+
+const OverlayContent: React.FC<{ overlay: TalkingHeadOverlay; styleTokens?: StyleTokens; only?: "back" | "front" }> = ({
   overlay,
+  styleTokens,
+  only,
 }) => {
   const bgColor = overlay.backgroundColor || "#0F172A";
+  const st: StyleTokens = {
+    ...styleTokens,
+    ...(overlay.accentColor ? { accentColor: overlay.accentColor } : {}),
+    ...(overlay.color ? { textColor: overlay.color } : {}),
+    ...(overlay.backgroundColor ? { surfaceColor: overlay.backgroundColor } : {}),
+  };
+
+  if (overlay.type === "phone_mockup" && (overlay.screenSrc || overlay.mockupSrc)) {
+    return (
+      <PhoneMockup
+        {...st}
+        screenSrc={overlay.screenSrc}
+        mockupSrc={overlay.mockupSrc}
+        side={overlay.side}
+        label={overlay.label}
+        scrollFraction={overlay.scrollFraction}
+        tapAt={overlay.tapAt}
+        tapAtSeconds={overlay.tapAtSeconds}
+      />
+    );
+  }
+  if (overlay.type === "ui_world" && overlay.cards?.length) {
+    return <UIWorld {...st} cards={overlay.cards} only={only} />;
+  }
+  if (overlay.type === "checklist" && overlay.items?.length) {
+    return <Checklist {...st} items={overlay.items} title={overlay.title} itemSeconds={overlay.itemSeconds} position={overlay.placement} />;
+  }
+  if (overlay.type === "chart_grow" && overlay.chartData?.length) {
+    return (
+      <ChartGrow
+        {...st}
+        data={overlay.chartData}
+        title={overlay.title}
+        headline={overlay.headline}
+        valuePrefix={overlay.valuePrefix}
+        valueSuffix={overlay.valueSuffix}
+        highlightIndex={overlay.highlightIndex}
+        position={overlay.placement}
+      />
+    );
+  }
+  if (overlay.type === "text_behind" && overlay.text) {
+    return <TextBehind {...st} text={overlay.text} subtitle={overlay.subtitle} top={overlay.top} fontSize={overlay.fontSize} />;
+  }
 
   if (overlay.type === "text_card" && overlay.text) {
     return (
@@ -248,8 +321,10 @@ const OverlayContent: React.FC<{ overlay: TalkingHeadOverlay }> = ({
 // Positioned overlay wrapper — handles position + fade in/out
 // ---------------------------------------------------------------------------
 
-const PositionedOverlay: React.FC<{ overlay: TalkingHeadOverlay }> = ({
+const PositionedOverlay: React.FC<{ overlay: TalkingHeadOverlay; styleTokens?: StyleTokens; only?: "back" | "front" }> = ({
   overlay,
+  styleTokens,
+  only,
 }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
@@ -266,6 +341,15 @@ const PositionedOverlay: React.FC<{ overlay: TalkingHeadOverlay }> = ({
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
   const opacity = fadeIn * fadeOut;
+
+  if (STYLE_PACK_TYPES.includes(overlay.type)) {
+    // Full-frame effects that run their own enter/exit motion.
+    return (
+      <AbsoluteFill>
+        <OverlayContent overlay={overlay} styleTokens={styleTokens} only={only} />
+      </AbsoluteFill>
+    );
+  }
 
   const position = overlay.position || "lower_third";
   const posStyle = POSITION_STYLES[position] || POSITION_STYLES.lower_third;
@@ -310,6 +394,12 @@ export interface TalkingHeadProps {
   captionWordSeparator?: string;
   captionBottomOffset?: number;
   captionHighlightMode?: "karaoke" | "emphasis";
+  /** Alpha video of the presenter alone (bg_remove.py video mode). When set,
+   *  "behind" overlays (text_behind, the far side of ui_world) render between
+   *  the background and the presenter. */
+  foregroundMatteSrc?: string;
+  /** Brand style-card tokens applied to every style-pack effect. */
+  styleTokens?: StyleTokens;
 }
 
 export const TalkingHead: React.FC<TalkingHeadProps> = ({
@@ -325,8 +415,21 @@ export const TalkingHead: React.FC<TalkingHeadProps> = ({
   captionWordSeparator,
   captionBottomOffset,
   captionHighlightMode,
+  foregroundMatteSrc,
+  styleTokens,
 }) => {
   const { fps } = useVideoConfig();
+  const seq = (overlay: TalkingHeadOverlay, i: number, only?: "back" | "front") => (
+    <Sequence
+      key={`${overlay.id || `overlay-${i}`}-${only ?? "all"}`}
+      from={Math.round(overlay.in_seconds * fps)}
+      durationInFrames={Math.round((overlay.out_seconds - overlay.in_seconds) * fps)}
+    >
+      <PositionedOverlay overlay={overlay} styleTokens={styleTokens} only={only} />
+    </Sequence>
+  );
+  const isBehind = (o: TalkingHeadOverlay) => !!foregroundMatteSrc && (o.layer === "behind" || o.type === "text_behind");
+  const splitsAroundMatte = (o: TalkingHeadOverlay) => !!foregroundMatteSrc && o.type === "ui_world" && o.layer !== "front";
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
@@ -336,22 +439,21 @@ export const TalkingHead: React.FC<TalkingHeadProps> = ({
         style={{ width: "100%", height: "100%", objectFit: "cover" }}
       />
 
-      {/* Layer 2: Overlays (charts, stats, callouts, etc.) */}
-      {overlays?.map((overlay, i) => {
-        const from = Math.round(overlay.in_seconds * fps);
-        const duration = Math.round(
-          (overlay.out_seconds - overlay.in_seconds) * fps
-        );
-        return (
-          <Sequence
-            key={overlay.id || `overlay-${i}`}
-            from={from}
-            durationInFrames={duration}
-          >
-            <PositionedOverlay overlay={overlay} />
-          </Sequence>
-        );
-      })}
+      {/* Layer 2a: behind-the-presenter overlays, then the presenter matte */}
+      {foregroundMatteSrc && (
+        <>
+          {overlays?.map((o, i) => (isBehind(o) ? seq(o, i) : splitsAroundMatte(o) ? seq(o, i, "back") : null))}
+          <OffthreadVideo
+            src={resolveAsset(foregroundMatteSrc)}
+            transparent
+            muted
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </>
+      )}
+
+      {/* Layer 2b: overlays in front (charts, stats, callouts, effects) */}
+      {overlays?.map((o, i) => (isBehind(o) ? null : splitsAroundMatte(o) ? seq(o, i, "front") : seq(o, i)))}
 
       {/* Layer 3: Captions (topmost — always visible above overlays) */}
       <CaptionOverlay

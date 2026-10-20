@@ -3,6 +3,7 @@ import { cancelRender, continueRender, delayRender } from "remotion";
 import playfairItalicUrl from "../fonts/PlayfairDisplay-Italic-latin.woff2";
 import playfairUrl from "../fonts/PlayfairDisplay-latin.woff2";
 import spaceGroteskUrl from "../fonts/SpaceGrotesk-latin.woff2";
+import archivoUrl from "../fonts/Archivo-latin.woff2";
 
 /**
  * Fonts bundled with the compositions instead of fetched from Google Fonts at
@@ -53,3 +54,6 @@ export const loadSpaceGrotesk = (weights: string[]) => ({ fontFamily: register("
 export const loadPlayfair = (style: "normal" | "italic", weights: string[]) => ({
   fontFamily: register("Playfair Display", style === "italic" ? playfairItalicUrl : playfairUrl, style, weights),
 });
+
+/** Archivo (variable, v25 latin; SIL OFL 1.1) — ProofWright's display + body face. */
+export const loadArchivo = (weights: string[]) => ({ fontFamily: register("Archivo", archivoUrl, "normal", weights) });
