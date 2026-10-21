@@ -109,11 +109,11 @@ const PageRenderer: React.FC<{
                     fontFamily,
                     fontWeight: 800,
                     textTransform: "uppercase",
-                    margin: "0 0.08em", // room for the active word's scale-up
+                    margin: "0 0.18em", // room for the active word's scale-up
                     fontSize: fontSize * (big ? 1.35 : 1),
                     color: big || isActive ? highlightColor : color,
                     opacity: spoken ? 1 : 0,
-                    transform: `scale(${spoken ? interpolate(pop, [0, 1], [0.55, isActive ? 1.12 : 1]) : 0.55})`,
+                    transform: `scale(${spoken ? interpolate(pop, [0, 1], [0.55, isActive ? 1.08 : 1]) : 0.55})`,
                     WebkitTextStroke: `${Math.max(2, fontSize * 0.05)}px rgba(0,0,0,0.85)`,
                     paintOrder: "stroke fill",
                     textShadow: "0 4px 14px rgba(0,0,0,0.55)",
