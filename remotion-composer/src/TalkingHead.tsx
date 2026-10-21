@@ -33,6 +33,7 @@ import { NotificationStack, StackNotification } from "./components/stylepack/Not
 import { HeadlineWall, Headline } from "./components/stylepack/HeadlineWall";
 import { StyleTokens } from "./components/stylepack/shared";
 import { punchInScale, zoomThrough } from "./components/stylepack/motion";
+import { Sfx, SfxContext, SfxKind } from "./components/stylepack/sfx";
 
 // ---------------------------------------------------------------------------
 // Overlay types for talking-head video
@@ -457,6 +458,13 @@ export interface TalkingHeadProps {
   foregroundMatteDurationSeconds?: number;
   /** Brand style-card tokens applied to every style-pack effect. */
   styleTokens?: StyleTokens;
+  /** Style-pack sound effects (whoosh, ticks, pops, swell, slams) timed to the motion.
+   *  Default on; `false` renders the same video silent apart from the take. */
+  sfx?: boolean;
+  /** Brand level for every sound effect (style card `style_pack.sfx.volume`, default 1). */
+  sfxVolume?: number;
+  /** Only these sounds play (style card `style_pack.sfx.kinds`); default all. */
+  sfxKinds?: SfxKind[];
 }
 
 export const TalkingHead: React.FC<TalkingHeadProps> = ({
@@ -478,6 +486,9 @@ export const TalkingHead: React.FC<TalkingHeadProps> = ({
   styleTokens,
   punchIns,
   transitions,
+  sfx = true,
+  sfxVolume = 1,
+  sfxKinds,
 }) => {
   const { fps } = useVideoConfig();
   const t = useCurrentFrame() / fps;
@@ -496,7 +507,10 @@ export const TalkingHead: React.FC<TalkingHeadProps> = ({
   const splitsAroundMatte = (o: TalkingHeadOverlay) => !!foregroundMatteSrc && o.type === "ui_world" && o.layer !== "front";
 
   return (
+    <SfxContext.Provider value={{ enabled: sfx, volume: sfxVolume, kinds: sfxKinds }}>
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
+      {/* whoosh.wav peaks 0.25 s in, on the zoom_through peak */}
+      {transitions?.map((tr, i) => <Sfx key={`whoosh-${i}`} kind="whoosh" frame={(tr.at - 0.25) * fps} />)}
      <AbsoluteFill style={{ transform: `scale(${whoosh.scale})`, filter: whoosh.blur > 0.1 ? `blur(${whoosh.blur}px)` : undefined }}>
      <AbsoluteFill style={{ transform: `scale(${camera})`, transformOrigin: "50% 32%" }}>
       {/* Layer 1: Video background */}
@@ -542,5 +556,6 @@ export const TalkingHead: React.FC<TalkingHeadProps> = ({
         {...(captionHighlightMode ? { highlightMode: captionHighlightMode } : {})}
       />
     </AbsoluteFill>
+    </SfxContext.Provider>
   );
 };

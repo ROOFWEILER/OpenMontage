@@ -102,6 +102,8 @@ style_pack:
   # Variety (David 2026-10-20): every effect is optional, and none may repeat from this
   # brand's previous reel. punch_in is exempt (subtle camera work, not a recognizable look).
   rotation: {no_repeat_from_last_reels: 1, exempt: [punch_in]}
+  # Sound effects timed to the motion (audio.sfx_style): TalkingHead sfxVolume / sfxKinds.
+  sfx: {volume: 1.0, kinds: [whoosh, tick, pop, swell, slam]}
   presenter: "twin (David's HeyGen twin, Dave office look by default)"
   style_tokens:
     accentColor: "#FFB000"

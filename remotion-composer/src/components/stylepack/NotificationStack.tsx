@@ -1,5 +1,6 @@
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { StyleTokens, envelope, onColor, tokens } from "./shared";
+import { Sfx } from "./sfx";
 
 /**
  * NotificationStack — phone notifications drop in from the top and stack
@@ -43,6 +44,7 @@ export const NotificationStack: React.FC<NotificationStackProps> = ({ notificati
           </div>
         );
       })}
+      {notifications.map((_, i) => <Sfx key={`sfx-${i}`} kind="pop" frame={at(i)} />)}
     </AbsoluteFill>
   );
 };

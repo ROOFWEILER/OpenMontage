@@ -98,4 +98,11 @@ Code-drawn, deterministic, $0 per reel. Full-frame overlays on the `TalkingHead`
 - `transitions: [{at, type: "zoom_through"}]` — whoosh (scale + blur) on everything but the captions, at a beat change.
 - `captionHighlightMode: "kinetic"` — no bar, words pop in as spoken, the spoken word scales up, `emphasis: true` words are bigger in `highlightColor`.
 
+### Sound effects (TalkingHead props, David 2026-10-21)
+
+Each effect plays a short sound on the frame it moves, from the same timings as the motion: `zoom_through` → whoosh, `checklist` / `step_tracker` → a soft tick per item, `notification_stack` → a pop per banner, `chart_grow` → one swell as the bars start, `headline_wall` → a light slam per card. Levels sit well under the VO. Sounds are CC0, synthesized by `scripts/make_sfx.py` into `public/sfx/` (license: `public/sfx/LICENSE.md`).
+
+- `sfx: false` — turn every sound effect off (default on).
+- `sfxVolume` / `sfxKinds` — copy from the style card's `style_pack.sfx` (`volume`, `kinds`). ProofWright plays all five; Roofweiler and Tepui Construction play ticks only, quieter.
+
 **Variety rule:** everything above is optional. A style card's `style_pack.rotation` says none may repeat from the brand's previous reel (`punch_in` exempt); the content line's gate enforces it.

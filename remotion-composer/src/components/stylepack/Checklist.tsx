@@ -1,5 +1,6 @@
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { StyleTokens, envelope, onColor, tokens } from "./shared";
+import { Sfx } from "./sfx";
 
 /**
  * Checklist — a glass panel whose items tick off one by one: the box pops,
@@ -97,6 +98,7 @@ export const Checklist: React.FC<ChecklistProps> = ({ items, title, itemSeconds,
           );
         })}
       </div>
+      {items.map((_, i) => <Sfx key={i} kind="tick" frame={at(i)} />)}
     </AbsoluteFill>
   );
 };

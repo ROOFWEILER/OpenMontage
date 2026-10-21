@@ -243,7 +243,16 @@
         "presenter": { "type": "string" },
         "style_tokens": { "type": "object" },
         "caption": { "type": "object" },
-        "also_allowed_visuals": { "type": "array", "items": { "type": "string" } }
+        "also_allowed_visuals": { "type": "array", "items": { "type": "string" } },
+        "sfx": {
+          "description": "Style-pack sound effects for this brand: TalkingHead sfxVolume (volume) and sfxKinds (kinds).",
+          "type": "object",
+          "properties": {
+            "volume": { "type": "number", "minimum": 0, "maximum": 2 },
+            "kinds": { "type": "array", "items": { "enum": ["whoosh", "tick", "pop", "swell", "slam"] } }
+          },
+          "additionalProperties": false
+        }
       }
     },
     "overrides": {
