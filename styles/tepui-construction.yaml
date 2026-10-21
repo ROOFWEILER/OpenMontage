@@ -85,7 +85,7 @@ color_rules:
 
 style_pack:
   brand: tepui-construction
-  effects_allowed: [checklist, chart_grow, plan_draw, highlighter, step_tracker]
+  effects_allowed: [phone_mockup, checklist, chart_grow, plan_draw, highlighter, step_tracker]
   also_allowed_visuals: ["documents", "plans/diagrams (code-drawn or real document scans)"]
   max_effects_per_reel: 2
   # Motion basics (pack 2): camera + caption moves, used where they help, never required.
