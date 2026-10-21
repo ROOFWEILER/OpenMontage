@@ -83,6 +83,7 @@ quality_rules:
   - "Every number on a chart is sourced in the script; the chart draws only the script's data"
   - "Text inside the 9:16 safe zone; captions stay readable above every effect"
   - "At most 3 style-pack effects per reel, never two at once"
+  - "notification_stack uses the product's real notification wording with sample-data amounts; headline_wall only real, sourced headlines, no publication logos"
 
 chart_palette: ["#FFB000", "#5B8CFF", "#8A8F9C", "#F2F3F5"]
 
@@ -94,8 +95,13 @@ color_rules:
 # Which style-pack effects this brand may use (remotion-composer TalkingHead overlay types).
 style_pack:
   brand: proofwright
-  effects_allowed: [phone_mockup, ui_world, checklist, chart_grow, text_behind]
+  effects_allowed: [phone_mockup, ui_world, checklist, chart_grow, text_behind, notification_stack, headline_wall]
   max_effects_per_reel: 3
+  # Motion basics (pack 2): camera + caption moves, used where they help, never required.
+  motion_allowed: [punch_in, zoom_through, kinetic_captions]
+  # Variety (David 2026-10-20): every effect is optional, and none may repeat from this
+  # brand's previous reel. punch_in is exempt (subtle camera work, not a recognizable look).
+  rotation: {no_repeat_from_last_reels: 1, exempt: [punch_in]}
   presenter: "twin (David's HeyGen twin, Dave office look by default)"
   style_tokens:
     accentColor: "#FFB000"

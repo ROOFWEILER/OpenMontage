@@ -229,7 +229,15 @@
         "brand": { "type": "string" },
         "effects_allowed": {
           "type": "array",
-          "items": { "enum": ["phone_mockup", "ui_world", "checklist", "chart_grow", "text_behind"] }
+          "items": { "enum": ["phone_mockup", "ui_world", "checklist", "chart_grow", "text_behind", "before_after", "location_pin", "plan_draw", "highlighter", "step_tracker", "notification_stack", "headline_wall"] }
+        },
+        "motion_allowed": {
+          "type": "array",
+          "items": { "enum": ["punch_in", "zoom_through", "kinetic_captions"] }
+        },
+        "rotation": {
+          "type": "object",
+          "properties": { "no_repeat_from_last_reels": { "type": "integer", "minimum": 0 }, "exempt": { "type": "array", "items": { "type": "string" } } }
         },
         "max_effects_per_reel": { "type": "integer", "minimum": 0 },
         "presenter": { "type": "string" },

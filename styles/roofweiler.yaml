@@ -73,6 +73,7 @@ quality_rules:
   - "Banned phrases: Free Estimate, Free inspection, Schedule Inspection, Book an appointment, Florida's Protector"
   - "Every number is sourced in the script"
   - "At most 2 style-pack effects per reel"
+  - "before_after uses REAL job photos of the same roof (never a generated after image); location_pin names a city, never an address"
 
 chart_palette: ["#FFC200", "#FFFFFF", "#7A7A7A"]
 
@@ -83,8 +84,13 @@ color_rules:
 
 style_pack:
   brand: roofweiler
-  effects_allowed: [checklist, chart_grow]
+  effects_allowed: [checklist, chart_grow, before_after, location_pin]
   max_effects_per_reel: 2
+  # Motion basics (pack 2): camera + caption moves, used where they help, never required.
+  motion_allowed: [punch_in, zoom_through, kinetic_captions]
+  # Variety (David 2026-10-20): every effect is optional, and none may repeat from this
+  # brand's previous reel. punch_in is exempt (subtle camera work, not a recognizable look).
+  rotation: {no_repeat_from_last_reels: 1, exempt: [punch_in]}
   presenter: "never David; faceless or an invented AI presenter labeled AI"
   style_tokens:
     accentColor: "#FFC200"
