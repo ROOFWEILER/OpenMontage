@@ -1,6 +1,6 @@
 import { AbsoluteFill, Img, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import { resolveAsset } from "../../lib/resolveAsset";
-import { StyleTokens, envelope, float, tokens } from "./shared";
+import { StyleTokens, envelope, float, onColor, tokens } from "./shared";
 
 /**
  * PhoneMockup — a real app screen inside an iPhone that rises in from the
@@ -139,7 +139,7 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
             padding: "18px 28px",
             borderRadius: 999,
             background: t.accent,
-            color: "#0B0F19",
+            color: onColor(t.accent),
             fontFamily: t.font,
             fontWeight: 700,
             fontSize: 40,

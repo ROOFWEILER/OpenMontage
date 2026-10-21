@@ -24,7 +24,15 @@ import { UIWorld, UIWorldCard } from "./components/stylepack/UIWorld";
 import { Checklist } from "./components/stylepack/Checklist";
 import { ChartGrow } from "./components/stylepack/ChartGrow";
 import { TextBehind } from "./components/stylepack/TextBehind";
+import { BeforeAfter } from "./components/stylepack/BeforeAfter";
+import { LocationPin } from "./components/stylepack/LocationPin";
+import { PlanDraw, PlanRoom } from "./components/stylepack/PlanDraw";
+import { Highlighter } from "./components/stylepack/Highlighter";
+import { StepTracker } from "./components/stylepack/StepTracker";
+import { NotificationStack, StackNotification } from "./components/stylepack/NotificationStack";
+import { HeadlineWall, Headline } from "./components/stylepack/HeadlineWall";
 import { StyleTokens } from "./components/stylepack/shared";
+import { punchInScale, zoomThrough } from "./components/stylepack/motion";
 
 // ---------------------------------------------------------------------------
 // Overlay types for talking-head video
@@ -81,6 +89,24 @@ export interface TalkingHeadOverlay {
   barSeconds?: number[];
   placement?: "lower" | "center" | "upper";
   top?: number;
+  // Style pack 2 (brand packs)
+  beforeSrc?: string;
+  afterSrc?: string;
+  beforeLabel?: string;
+  afterLabel?: string;
+  place?: string;
+  mapSrc?: string;
+  pinAt?: [number, number];
+  rooms?: PlanRoom[];
+  dimension?: string;
+  highlightRoom?: number;
+  lines?: string[];
+  highlights?: number[];
+  highlightSeconds?: number[];
+  steps?: string[];
+  stepSeconds?: number[];
+  notifications?: StackNotification[];
+  headlines?: Headline[];
   /** "behind" = between the background video and the presenter matte. */
   layer?: "behind" | "front";
   // Styling
@@ -136,7 +162,7 @@ const POSITION_STYLES: Record<string, React.CSSProperties> = {
 // Overlay component dispatcher — maps overlay type to Remotion component
 // ---------------------------------------------------------------------------
 
-const STYLE_PACK_TYPES = ["phone_mockup", "ui_world", "checklist", "chart_grow", "text_behind"];
+const STYLE_PACK_TYPES = ["phone_mockup", "ui_world", "checklist", "chart_grow", "text_behind", "before_after", "location_pin", "plan_draw", "highlighter", "step_tracker", "notification_stack", "headline_wall"];
 
 const OverlayContent: React.FC<{ overlay: TalkingHeadOverlay; styleTokens?: StyleTokens; only?: "back" | "front" }> = ({
   overlay,
@@ -185,6 +211,27 @@ const OverlayContent: React.FC<{ overlay: TalkingHeadOverlay; styleTokens?: Styl
         position={overlay.placement}
       />
     );
+  }
+  if (overlay.type === "before_after" && overlay.beforeSrc && overlay.afterSrc) {
+    return <BeforeAfter {...st} beforeSrc={overlay.beforeSrc} afterSrc={overlay.afterSrc} beforeLabel={overlay.beforeLabel} afterLabel={overlay.afterLabel} position={overlay.placement} />;
+  }
+  if (overlay.type === "location_pin" && overlay.place) {
+    return <LocationPin {...st} place={overlay.place} sublabel={overlay.subtitle} mapSrc={overlay.mapSrc} pinAt={overlay.pinAt} position={overlay.placement} />;
+  }
+  if (overlay.type === "plan_draw") {
+    return <PlanDraw {...st} rooms={overlay.rooms} title={overlay.title} dimension={overlay.dimension} highlightRoom={overlay.highlightRoom} position={overlay.placement} />;
+  }
+  if (overlay.type === "highlighter" && overlay.lines?.length) {
+    return <Highlighter {...st} lines={overlay.lines} highlights={overlay.highlights ?? []} title={overlay.title} highlightSeconds={overlay.highlightSeconds} position={overlay.placement} />;
+  }
+  if (overlay.type === "step_tracker" && overlay.steps?.length) {
+    return <StepTracker {...st} steps={overlay.steps} title={overlay.title} stepSeconds={overlay.stepSeconds} position={overlay.placement} />;
+  }
+  if (overlay.type === "notification_stack" && overlay.notifications?.length) {
+    return <NotificationStack {...st} notifications={overlay.notifications} itemSeconds={overlay.itemSeconds} top={overlay.top} />;
+  }
+  if (overlay.type === "headline_wall" && overlay.headlines?.length) {
+    return <HeadlineWall {...st} headlines={overlay.headlines} highlightIndex={overlay.highlightIndex} />;
   }
   if (overlay.type === "text_behind" && overlay.text) {
     return <TextBehind {...st} text={overlay.text} subtitle={overlay.subtitle} top={overlay.top} fontSize={overlay.fontSize} />;
@@ -395,7 +442,11 @@ export interface TalkingHeadProps {
   // Pass "" for CJK captions (no inter-word spacing); defaults to " ".
   captionWordSeparator?: string;
   captionBottomOffset?: number;
-  captionHighlightMode?: "karaoke" | "emphasis";
+  captionHighlightMode?: "karaoke" | "emphasis" | "kinetic";
+  /** Motion basics: quick zoom on the presenter at emphasis moments (s). */
+  punchIns?: { at: number; duration?: number; scale?: number }[];
+  /** Motion basics: whole-frame zoom-through whoosh at a beat change (s). */
+  transitions?: { at: number; type?: "zoom_through" }[];
   /** Alpha video of the presenter alone (bg_remove.py video mode). When set,
    *  "behind" overlays (text_behind, the far side of ui_world) render between
    *  the background and the presenter. */
@@ -425,8 +476,13 @@ export const TalkingHead: React.FC<TalkingHeadProps> = ({
   foregroundMatteStartSeconds = 0,
   foregroundMatteDurationSeconds,
   styleTokens,
+  punchIns,
+  transitions,
 }) => {
   const { fps } = useVideoConfig();
+  const t = useCurrentFrame() / fps;
+  const camera = punchInScale(t, punchIns); // presenter layers only
+  const whoosh = zoomThrough(t, transitions); // everything but the captions
   const seq = (overlay: TalkingHeadOverlay, i: number, only?: "back" | "front") => (
     <Sequence
       key={`${overlay.id || `overlay-${i}`}-${only ?? "all"}`}
@@ -441,6 +497,8 @@ export const TalkingHead: React.FC<TalkingHeadProps> = ({
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
+     <AbsoluteFill style={{ transform: `scale(${whoosh.scale})`, filter: whoosh.blur > 0.1 ? `blur(${whoosh.blur}px)` : undefined }}>
+     <AbsoluteFill style={{ transform: `scale(${camera})`, transformOrigin: "50% 32%" }}>
       {/* Layer 1: Video background */}
       <OffthreadVideo
         src={resolveAsset(videoSrc)}
@@ -464,9 +522,11 @@ export const TalkingHead: React.FC<TalkingHeadProps> = ({
           </Sequence>
         </>
       )}
+     </AbsoluteFill>
 
       {/* Layer 2b: overlays in front (charts, stats, callouts, effects) */}
       {overlays?.map((o, i) => (isBehind(o) ? null : splitsAroundMatte(o) ? seq(o, i, "front") : seq(o, i)))}
+     </AbsoluteFill>
 
       {/* Layer 3: Captions (topmost — always visible above overlays) */}
       <CaptionOverlay

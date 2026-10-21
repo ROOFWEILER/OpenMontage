@@ -50,3 +50,13 @@ export const envelope = (
 /** Deterministic idle float: a slow sine on frame, phase-shifted per item. */
 export const float = (frame: number, fps: number, amp = 10, periodSec = 4, phase = 0) =>
   Math.sin(((frame / fps) * 2 * Math.PI) / periodSec + phase) * amp;
+
+/** Black or white, whichever reads on the accent (yellow/amber → black, ink/red → white). */
+export const onColor = (hex: string) => {
+  const m = /^#?([0-9a-f]{6})/i.exec(hex);
+  if (!m) return "#000";
+  const n = parseInt(m[1], 16);
+  const lin = (c: number) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const L = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+  return L > 0.4 ? "#000" : "#FFF";
+};

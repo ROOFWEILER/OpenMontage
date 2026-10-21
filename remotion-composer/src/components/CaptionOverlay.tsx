@@ -35,8 +35,10 @@ type CaptionOverlayProps = {
   // Distance from frame bottom to the caption block, in px. Default 80.
   bottomOffset?: number;
   // "karaoke" (default) highlights the word being spoken; "emphasis" shows the
-  // whole phrase in `color` and highlights only words with emphasis: true.
-  highlightMode?: "karaoke" | "emphasis";
+  // whole phrase in `color` and highlights only words with emphasis: true;
+  // "kinetic" (style pack) has no bar: each word pops in as it is spoken, the
+  // spoken word is scaled up in highlightColor, emphasis words stay big.
+  highlightMode?: "karaoke" | "emphasis" | "kinetic";
 };
 
 interface CaptionPage {
@@ -74,7 +76,7 @@ const PageRenderer: React.FC<{
   fontFamily: string;
   wordSeparator: string;
   bottomOffset: number;
-  highlightMode: "karaoke" | "emphasis";
+  highlightMode: "karaoke" | "emphasis" | "kinetic";
 }> = ({ page, fontSize, color, highlightColor, backgroundColor, fontFamily, wordSeparator, bottomOffset, highlightMode }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -87,6 +89,46 @@ const PageRenderer: React.FC<{
     fps,
     config: { damping: 18, stiffness: 120 },
   });
+
+  if (highlightMode === "kinetic") {
+    return (
+      <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: bottomOffset }}>
+        <div style={{ maxWidth: "86%", textAlign: "center", lineHeight: 1.15 }}>
+          {page.words.map((w, i) => {
+            const startFrame = ((w.startMs - page.startMs) / 1000) * fps;
+            const pop = spring({ frame: frame - startFrame, fps, config: { damping: 12, stiffness: 220, mass: 0.6 } });
+            const spoken = w.startMs <= currentMs;
+            const isActive = spoken && w.endMs > currentMs;
+            const big = !!w.emphasis;
+            return (
+              <Fragment key={`${w.startMs}-${i}`}>
+                <span
+                  style={{
+                    display: "inline-block",
+                    whiteSpace: "nowrap",
+                    fontFamily,
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    margin: "0 0.08em", // room for the active word's scale-up
+                    fontSize: fontSize * (big ? 1.35 : 1),
+                    color: big || isActive ? highlightColor : color,
+                    opacity: spoken ? 1 : 0,
+                    transform: `scale(${spoken ? interpolate(pop, [0, 1], [0.55, isActive ? 1.12 : 1]) : 0.55})`,
+                    WebkitTextStroke: `${Math.max(2, fontSize * 0.05)}px rgba(0,0,0,0.85)`,
+                    paintOrder: "stroke fill",
+                    textShadow: "0 4px 14px rgba(0,0,0,0.55)",
+                  }}
+                >
+                  {w.word}
+                </span>
+                {i < page.words.length - 1 ? wordSeparator : ""}
+              </Fragment>
+            );
+          })}
+        </div>
+      </AbsoluteFill>
+    );
+  }
 
   return (
     <AbsoluteFill
@@ -170,9 +212,11 @@ export const CaptionOverlay: React.FC<CaptionOverlayProps> = ({
       {pages.map((page, i) => {
         const fromFrame = Math.round((page.startMs / 1000) * fps);
         const nextStart = pages[i + 1]?.startMs ?? page.endMs + 500;
+        // End where the next page starts, both rounded the same way, so two
+        // pages never share a frame.
         const duration = Math.max(
           1,
-          Math.round(((nextStart - page.startMs) / 1000) * fps)
+          Math.round((nextStart / 1000) * fps) - fromFrame
         );
 
         return (
