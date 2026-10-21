@@ -1,5 +1,6 @@
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { StyleTokens, envelope, onColor, tokens } from "./shared";
+import { Sfx } from "./sfx";
 
 /**
  * HeadlineWall — news-style headline cards slam onto a wall one after another
@@ -21,12 +22,13 @@ export const HeadlineWall: React.FC<HeadlineWallProps> = ({ headlines, highlight
   const { fps, durationInFrames, width, height } = useVideoConfig();
   const t = tokens(style);
   const { visible } = envelope(frame, fps, durationInFrames, { outFrames: 10 });
+  const slamAt = (i: number) => 4 + i * 7;
   const pull = interpolate(frame, [0, durationInFrames], [1.12, 0.96]);
   return (
     <AbsoluteFill style={{ opacity: visible, transform: `scale(${pull})`, background: "rgba(10,11,14,0.55)" }}>
       {headlines.slice(0, SLOTS.length).map((h, i) => {
         const [x, y, rot] = SLOTS[i];
-        const slam = spring({ frame: frame - 4 - i * 7, fps, config: { damping: 12, stiffness: 200, mass: 0.7 } });
+        const slam = spring({ frame: frame - slamAt(i), fps, config: { damping: 12, stiffness: 200, mass: 0.7 } });
         const hi = i === highlightIndex;
         return (
           <div key={i} style={{ position: "absolute", left: width * x, top: height * y, width: width * 0.48, padding: "26px 28px", boxSizing: "border-box", background: hi ? t.accent : "#F4F1EA", color: hi ? onColor(t.accent) : "#111", borderRadius: 8, boxShadow: "0 18px 40px rgba(0,0,0,0.45)", transform: `rotate(${rot}deg) scale(${interpolate(slam, [0, 1], [1.6, 1])})`, opacity: Math.min(1, slam * 2), fontFamily: "Georgia, 'Times New Roman', serif" }}>
@@ -35,6 +37,7 @@ export const HeadlineWall: React.FC<HeadlineWallProps> = ({ headlines, highlight
           </div>
         );
       })}
+      {headlines.slice(0, SLOTS.length).map((_, i) => <Sfx key={`sfx-${i}`} kind="slam" frame={slamAt(i) + 3} />)}
     </AbsoluteFill>
   );
 };

@@ -93,6 +93,8 @@ style_pack:
   # Variety (David 2026-10-20): every effect is optional, and none may repeat from this
   # brand's previous reel. punch_in is exempt (subtle camera work, not a recognizable look).
   rotation: {no_repeat_from_last_reels: 1, exempt: [punch_in]}
+  # Sound effects (audio.sfx_style "paper and pencil ticks, very subtle"): ticks only, half level.
+  sfx: {volume: 0.5, kinds: [tick]}
   presenter: "none (faceless)"
   style_tokens:
     accentColor: "#0B0B0C"   # ink for effects; red stays reserved for the one CTA
