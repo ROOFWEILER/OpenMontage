@@ -400,6 +400,10 @@ export interface TalkingHeadProps {
    *  "behind" overlays (text_behind, the far side of ui_world) render between
    *  the background and the presenter. */
   foregroundMatteSrc?: string;
+  /** When the matte covers only part of the take (cut out just the seconds that
+   *  need it), where that part starts. The matte plays from here for its own length. */
+  foregroundMatteStartSeconds?: number;
+  foregroundMatteDurationSeconds?: number;
   /** Brand style-card tokens applied to every style-pack effect. */
   styleTokens?: StyleTokens;
 }
@@ -418,6 +422,8 @@ export const TalkingHead: React.FC<TalkingHeadProps> = ({
   captionBottomOffset,
   captionHighlightMode,
   foregroundMatteSrc,
+  foregroundMatteStartSeconds = 0,
+  foregroundMatteDurationSeconds,
   styleTokens,
 }) => {
   const { fps } = useVideoConfig();
@@ -445,12 +451,17 @@ export const TalkingHead: React.FC<TalkingHeadProps> = ({
       {foregroundMatteSrc && (
         <>
           {overlays?.map((o, i) => (isBehind(o) ? seq(o, i) : splitsAroundMatte(o) ? seq(o, i, "back") : null))}
-          <OffthreadVideo
-            src={resolveAsset(foregroundMatteSrc)}
-            transparent
-            muted
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-          />
+          <Sequence
+            from={Math.round(foregroundMatteStartSeconds * fps)}
+            {...(foregroundMatteDurationSeconds ? { durationInFrames: Math.round(foregroundMatteDurationSeconds * fps) } : {})}
+          >
+            <OffthreadVideo
+              src={resolveAsset(foregroundMatteSrc)}
+              transparent
+              muted
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </Sequence>
         </>
       )}
 
