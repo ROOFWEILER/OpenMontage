@@ -19,13 +19,16 @@ import { LOGO_STUDIO_BRANDS, LogoAsset, LogoStudioBrand, Intensity } from "./bra
  * no network, no per-render cost. The front face is the untouched logo file, so the mark can
  * never drift from the source.
  *
- * Props: brand (key of LOGO_STUDIO_BRANDS), transparent (no background: alpha renders).
+ * Props: brand (key of LOGO_STUDIO_BRANDS), transparent (no background: alpha renders),
+ * cta / url (end card only: replace the kit's CTA pill text and URL so they match the reel's spoken offer).
  * Size comes from the composition (9x16 / 1x1 / 16x9), everything scales off min(width, height).
  */
 
 export type LogoStudioProps = {
   brand: string;
   transparent?: boolean;
+  cta?: string;
+  url?: string;
 };
 
 const getBrand = (key: string): LogoStudioBrand => {
@@ -225,8 +228,9 @@ const rise = (frame: number, start: number, u: number) => {
   return { opacity: t, transform: `translateY(${(1 - t) * 28 * u}px)` };
 };
 
-export const LogoEndCard: React.FC<LogoStudioProps> = ({ brand, transparent = false }) => {
-  const b = getBrand(brand);
+export const LogoEndCard: React.FC<LogoStudioProps> = ({ brand, transparent = false, cta, url }) => {
+  const kit = getBrand(brand);
+  const b = { ...kit, cta: cta ?? kit.cta, url: url ?? kit.url };
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
   const u = Math.min(width, height) / 1080;

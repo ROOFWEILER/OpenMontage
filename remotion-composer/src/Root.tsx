@@ -1,4 +1,4 @@
-import { Composition, CalculateMetadataFunction } from "remotion";
+import { Composition, CalculateMetadataFunction, staticFile } from "remotion";
 import { Explainer, ExplainerProps } from "./Explainer";
 import {
   CinematicRenderer,
@@ -17,11 +17,21 @@ import { CaptionOverlay, WordCaption } from "./components/CaptionOverlay";
 import { CollageBurst, CollageBurstProps } from "./CollageBurst";
 import { LyricOverlay, LyricOverlayProps } from "./LyricOverlay";
 import { LogoIntro, LogoEndCard } from "./logoStudio/LogoStudio";
+import { SureWrightLaunch, SureWrightLaunchProps } from "./SureWrightLaunch";
 import { ProofWrightLockup, PW_LOCKUP_SIZE } from "./logoStudio/ProofWrightLockup";
 import { ASPECT_SIZES, ENDCARD_FRAMES, INTRO_FRAMES, LOGO_STUDIO_FPS, LogoStudioAspect } from "./logoStudio/brands";
 
 // Logo studio: --props '{"brand":"roofweiler","aspect":"9x16","transparent":false}'
 type LogoStudioCompProps = { brand: string; transparent?: boolean; aspect?: LogoStudioAspect };
+// SureWright launch film (hero, 2026-10-21): timeline from public/surewright-launch/timeline.json
+// (hero/surewright-launch/build_timeline.py); --props '{"aspect":"16x9"}' for the wide cut.
+type SureWrightLaunchCompProps = Partial<SureWrightLaunchProps> & { aspect?: "9x16" | "16x9" };
+const sureWrightMetadata: CalculateMetadataFunction<SureWrightLaunchCompProps> = async ({ props }) => {
+  const timeline = await (await fetch(staticFile("surewright-launch/timeline.json"))).json();
+  const wide = props.aspect === "16x9";
+  return { durationInFrames: Math.round(timeline.total * 30), width: wide ? 1920 : 1080, height: wide ? 1080 : 1920, props: { ...props, timeline } };
+};
+
 const logoStudioMetadata: CalculateMetadataFunction<LogoStudioCompProps> = async ({ props }) =>
   ASPECT_SIZES[props.aspect ?? "9x16"] ?? ASPECT_SIZES["9x16"];
 
@@ -369,6 +379,16 @@ export const Root: React.FC = () => {
         height={1920}
         calculateMetadata={logoStudioMetadata}
         defaultProps={{ brand: "roofweiler", aspect: "9x16", transparent: false } as LogoStudioCompProps}
+      />
+      <Composition
+        id="SureWrightLaunch"
+        component={SureWrightLaunch as unknown as React.FC<SureWrightLaunchCompProps>}
+        durationInFrames={1017}
+        fps={30}
+        width={1080}
+        height={1920}
+        calculateMetadata={sureWrightMetadata}
+        defaultProps={{ aspect: "9x16" } as SureWrightLaunchCompProps}
       />
     </>
   );
