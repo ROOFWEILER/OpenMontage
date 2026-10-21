@@ -16,6 +16,14 @@ import { ProductReveal, ProductRevealProps } from "./components/ProductReveal";
 import { CaptionOverlay, WordCaption } from "./components/CaptionOverlay";
 import { CollageBurst, CollageBurstProps } from "./CollageBurst";
 import { LyricOverlay, LyricOverlayProps } from "./LyricOverlay";
+import { LogoIntro, LogoEndCard } from "./logoStudio/LogoStudio";
+import { ProofWrightLockup, PW_LOCKUP_SIZE } from "./logoStudio/ProofWrightLockup";
+import { ASPECT_SIZES, ENDCARD_FRAMES, INTRO_FRAMES, LOGO_STUDIO_FPS, LogoStudioAspect } from "./logoStudio/brands";
+
+// Logo studio: --props '{"brand":"roofweiler","aspect":"9x16","transparent":false}'
+type LogoStudioCompProps = { brand: string; transparent?: boolean; aspect?: LogoStudioAspect };
+const logoStudioMetadata: CalculateMetadataFunction<LogoStudioCompProps> = async ({ props }) =>
+  ASPECT_SIZES[props.aspect ?? "9x16"] ?? ASPECT_SIZES["9x16"];
 
 // ---------------------------------------------------------------------------
 // Theme System — prevents every video from looking like dark fintech
@@ -333,6 +341,34 @@ export const Root: React.FC = () => {
           fadeOutSeconds: 1.5,
           overlay: true,
         } as EndTagProps}
+      />
+      <Composition
+        id="LogoIntro"
+        component={LogoIntro}
+        durationInFrames={INTRO_FRAMES}
+        fps={LOGO_STUDIO_FPS}
+        width={1080}
+        height={1920}
+        calculateMetadata={logoStudioMetadata}
+        defaultProps={{ brand: "roofweiler", aspect: "9x16", transparent: false } as LogoStudioCompProps}
+      />
+      <Composition
+        id="LogoStudioProofWrightLockup"
+        component={ProofWrightLockup}
+        durationInFrames={1}
+        fps={LOGO_STUDIO_FPS}
+        width={PW_LOCKUP_SIZE.width}
+        height={PW_LOCKUP_SIZE.height}
+      />
+      <Composition
+        id="LogoEndCard"
+        component={LogoEndCard}
+        durationInFrames={ENDCARD_FRAMES}
+        fps={LOGO_STUDIO_FPS}
+        width={1080}
+        height={1920}
+        calculateMetadata={logoStudioMetadata}
+        defaultProps={{ brand: "roofweiler", aspect: "9x16", transparent: false } as LogoStudioCompProps}
       />
     </>
   );

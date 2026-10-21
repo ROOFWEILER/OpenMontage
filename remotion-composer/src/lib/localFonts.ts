@@ -4,6 +4,9 @@ import playfairItalicUrl from "../fonts/PlayfairDisplay-Italic-latin.woff2";
 import playfairUrl from "../fonts/PlayfairDisplay-latin.woff2";
 import spaceGroteskUrl from "../fonts/SpaceGrotesk-latin.woff2";
 import archivoUrl from "../fonts/Archivo-latin.woff2";
+import interUrl from "../fonts/Inter-latin.woff2";
+import robotoUrl from "../fonts/Roboto-latin.woff2";
+import bebasUrl from "../fonts/BebasNeue-latin.woff2";
 
 /**
  * Fonts bundled with the compositions instead of fetched from Google Fonts at
@@ -57,3 +60,10 @@ export const loadPlayfair = (style: "normal" | "italic", weights: string[]) => (
 
 /** Archivo (variable, v25 latin; SIL OFL 1.1) — ProofWright's display + body face. */
 export const loadArchivo = (weights: string[]) => ({ fontFamily: register("Archivo", archivoUrl, "normal", weights) });
+
+/** Inter (variable, v20 latin; SIL OFL 1.1) — Tepui + Turnkey Crews body face. */
+export const loadInter = (weights: string[]) => ({ fontFamily: register("Inter", interUrl, "normal", weights) });
+/** Roboto (variable, v51 latin; SIL OFL 1.1) — Roofweiler's brand body face. */
+export const loadRoboto = (weights: string[]) => ({ fontFamily: register("Roboto", robotoUrl, "normal", weights) });
+/** Bebas Neue (v16 latin; SIL OFL 1.1) — Turnkey Crews display face (single 400 weight). */
+export const loadBebasNeue = () => ({ fontFamily: register("Bebas Neue", bebasUrl, "normal", ["400"]) });
