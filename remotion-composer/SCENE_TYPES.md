@@ -63,3 +63,19 @@ Currently only `TerminalScene` exists. The pattern generalizes — likely candid
 - `TicketBoard` — Jira / Linear card moving across columns
 
 Pattern: follow `TerminalScene.tsx` — a `steps` list of timeline primitives, cursor-advancing durations, spring-based reveals, optional non-blocking pills/badges.
+
+---
+
+## Style-pack overlays (TalkingHead, David 2026-10-20)
+
+Code-drawn, deterministic, $0 per reel. Full-frame overlays on the `TalkingHead` composition that run their own enter/exit motion (`src/components/stylepack/`). Brand colors come from the TalkingHead prop `styleTokens` (copy `style_pack.style_tokens` from `styles/<brand>.yaml`); an overlay's `accentColor`/`color`/`backgroundColor` override them. Which brand may use which effect is in each style card's `style_pack.effects_allowed`.
+
+| `type` | Component | Required fields | Common fields | Purpose |
+|---|---|---|---|---|
+| `phone_mockup` | `PhoneMockup` | `screenSrc` (unframed) or `mockupSrc` (framed PNG) | `side` (left/right/center), `label`, `scrollFraction`, `tapAt` [x,y], `tapAtSeconds` | A real app screen in an iPhone that rises in, tilts and floats beside the presenter. Screens ONLY from the App Media Library Current set (`~/.claude/references/app-media-library.md`) |
+| `ui_world` | `UIWorld` | `cards` [{image} or {title, value}] | `layer: "front"` to keep it all in front | App UI cards orbit the presenter; with `foregroundMatteSrc` the far side passes behind them |
+| `checklist` | `Checklist` | `items` | `title`, `itemSeconds` (tick times, s from overlay start), `placement` (lower/center/upper) | Ticks pop and draw one by one |
+| `chart_grow` | `ChartGrow` | `chartData` [{label, value}] | `title`, `headline`, `valuePrefix`, `valueSuffix`, `highlightIndex`, `placement` | Bars grow, values count up, one bar in the accent. Only sourced numbers |
+| `text_behind` | `TextBehind` | `text` | `subtitle`, `top` (0-1), `fontSize` | Huge title between the background and the presenter (needs `foregroundMatteSrc`; without it, place it above the head) |
+
+**Presenter matte** (`foregroundMatteSrc`): run `bg_remove` on the presenter video — video input writes an alpha VP9 WebM (`{"input_path": "take.mp4", "output_path": "take_matte.webm"}`, needs `pip install rembg`). Overlays with `layer: "behind"` (and every `text_behind`, and the far half of `ui_world`) render under it.

@@ -1,0 +1,96 @@
+# Roofweiler brand style card (David 2026-10-20). Colors/fonts: ~/.claude/brands/roofweiler/
+# BRAND_GUIDE.md + assets/visual-tokens.json (black, yellow EXACTLY #FFC200, white; Integral CF + Roboto).
+identity:
+  name: "Roofweiler"
+  category: motion-graphics
+  mood: calm, trustworthy, reassuring, pressure-free
+  pace: moderate
+  best_for: "Roofweiler homeowner reels: real South Florida roofs, faceless VO or an invented AI presenter labeled AI"
+
+visual_language:
+  color_palette:
+    primary: ["#000000"]
+    accent: ["#FFC200"]
+    background: "#000000"
+    text: "#FFFFFF"
+    muted: "#BDBDBD"
+  composition: "real roof footage full-frame; one calm panel at a time in the lower half"
+  texture: "photographic, natural South Florida light; flat black/yellow graphics"
+
+typography:
+  headings:
+    font: "Integral CF"
+    weight: 700
+    tracking: "0.01em"
+  body:
+    font: "Roboto"
+    weight: 400
+    line_height: 1.4
+  scale_system: "major_third"
+  weight_matrix:
+    title: 700
+    heading: 700
+    body: 400
+    caption: 700
+
+motion:
+  transitions: [cut, fade, dissolve]
+  animation_style: "gentle ease-out, small overshoot at most; nothing flashy"
+  pacing_rules:
+    min_scene_hold_seconds: 2.0
+    max_scene_hold_seconds: 8
+    text_card_hold_seconds: 3.0
+    stat_card_hold_seconds: 3.0
+    transition_duration_seconds: 0.4
+  entrance: "fade-up"
+  exit: "fade-out"
+
+audio:
+  voice_style: "warm, plain-spoken, reassuring"
+  music_mood: "light acoustic / soft ambient"
+  music_volume: 0.07
+  sfx_style: "soft tick on checklist marks only"
+  ducking_threshold_db: -3
+
+asset_generation:
+  image_prompt_prefix: "South Florida home, terracotta tile or shingle roof, palms, natural light, "
+  image_negative_prompt: "snow, midwest houses, realtor staging, stock handshake, red, beige, teal, pastel, price tags, dollar signs"
+  diagram_style: "flat black and #FFC200 yellow, white text"
+  consistency_anchors:
+    - "Only black, yellow #FFC200 and white in graphics"
+    - "Real South Florida roofs (tile, shingle, metal, flat)"
+
+overlays:
+  stat_card:
+    bg: "#000000"
+    border: "#FFC200"
+    radius: 16
+
+quality_rules:
+  - "NEVER David's face (no twin); faceless or an invented AI presenter labeled AI on screen"
+  - "NO prices, dollar figures or price ranges anywhere (charts included: chart_grow never plots money)"
+  - "Banned colors: #E11D2A red, #EFE7DC beige, #23B6A4 teal, any pastel"
+  - "Banned phrases: Free Estimate, Free inspection, Schedule Inspection, Book an appointment, Florida's Protector"
+  - "Every number is sourced in the script"
+  - "At most 2 style-pack effects per reel"
+
+chart_palette: ["#FFC200", "#FFFFFF", "#7A7A7A"]
+
+color_rules:
+  harmony_type: "analogous"
+  contrast_validation: true
+  colorblind_safe: true
+
+style_pack:
+  brand: roofweiler
+  effects_allowed: [checklist, chart_grow]
+  max_effects_per_reel: 2
+  presenter: "never David; faceless or an invented AI presenter labeled AI"
+  style_tokens:
+    accentColor: "#FFC200"
+    surfaceColor: "rgba(0, 0, 0, 0.82)"
+    textColor: "#FFFFFF"
+    mutedColor: "#BDBDBD"
+    fontFamily: "Space Grotesk"   # Integral CF/Roboto are not bundled in the composer yet
+  caption:
+    highlightColor: "#FFC200"
