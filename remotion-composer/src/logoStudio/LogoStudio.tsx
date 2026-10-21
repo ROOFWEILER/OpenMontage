@@ -203,7 +203,7 @@ export const LogoIntro: React.FC<LogoStudioProps> = ({ brand, transparent = fals
       <div style={{ position: "absolute", left: 0, top, width, height: blockH, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <div style={{ perspective: 1600 * u, width: w, height: h }}>
           <div style={{ width: w, height: h, transformStyle: "preserve-3d", transform: `translateZ(${z * u}px) rotateX(${rotX}deg) rotateY(${rotY}deg)`, opacity: lin }}>
-            <Logo3D asset={b.logo} w={w} h={h} depth={m.depth * u} sideBrightness={b.sideBrightness} sheen={sheen < 1 ? sheen : -1} glow={glowPulse > 0 ? `rgba(255,122,61,${0.55 * glowPulse})` : undefined} />
+            <Logo3D asset={b.logo} w={w} h={h} depth={m.depth * u} sideBrightness={b.sideBrightness} sheen={sheen < 1 ? sheen : -1} glow={glowPulse > 0 ? `rgba(255,176,0,${0.5 * glowPulse})` : undefined} />
           </div>
         </div>
         {shadow ? <div style={{ ...shadow, marginTop: hasWordmark ? -10 * u : 10 * u }} /> : null}

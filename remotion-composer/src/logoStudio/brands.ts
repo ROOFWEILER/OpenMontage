@@ -6,7 +6,9 @@ import { loadArchivo, loadBebasNeue, loadInter, loadRoboto } from "../lib/localF
  * Logos are the brands' REAL files, copied byte-for-byte into public/logo-studio/ and only
  * trimmed of fully transparent margin (pixels untouched). Never redraw a mark here.
  *   roofweiler-*            ~/.claude/brands/roofweiler/assets/logos/rw-{icon,wordmark}-yellow.png
- *   proofwright-mark        ~/.claude/brands/proofwright/assets/pw-mark.png (= live site public/pw-mark.png)
+ *   proofwright-lockup      proofwright.ai header logo (HTML/CSS on the site, no image file): rendered from
+ *                           its exact computed styles by ProofWrightLockup.tsx. The italic-serif "PW" PNG
+ *                           (pw-mark.png / pw-logo.png) is the OLD mark — never use it (David 2026-10-21).
  *   tepui-construction-*    tepuiconstruction.com public/tepui-logo-review.png (red mesa + CONSTRUCTION)
  *   tepui-management-*      tepuimanagement.com public/logos/wordmark.png (red mesa + MANAGEMENT)
  *   turnkey-crews-*         ~/.claude/brands/turnkey-crews/assets/logos/tkc-wordmark-white.png
@@ -84,13 +86,12 @@ export const LOGO_STUDIO_BRANDS: Record<string, LogoStudioBrand> = {
   proofwright: {
     name: "ProofWright",
     intensity: "bold",
-    logo: { src: "logo-studio/proofwright-mark.png", w: 475, h: 168 },
-    // The PNG is only 475 px wide: cap it so it never upscales past ~1.25x.
-    maxLogoWidth: 600,
+    logo: { src: "logo-studio/proofwright-lockup.png", w: 1447, h: 312 },
+    maxLogoWidth: 860,
+    // Live proofwright.ai: ground #0A0B0E, text #F2F3F5, amber #FFB000 (tile, "Wright", buttons).
     background: "#0A0B0E",
-    glow: "rgba(255,106,51,0.22)",
-    // Orange to match the real logo file (#FF6A33 -> #FF9F4B), not the unshipped amber re-lock.
-    accent: "#FF7A3D",
+    glow: "rgba(255,176,0,0.18)",
+    accent: "#FFB000",
     text: "#F2F3F5",
     muted: "#8A8F9C",
     sideBrightness: 0.38,
@@ -98,7 +99,7 @@ export const LOGO_STUDIO_BRANDS: Record<string, LogoStudioBrand> = {
     body: { family: archivo, weight: 500 },
     line: "Built by an operator.\nProven in production.",
     cta: "Comment BUILD for your AI build plan",
-    ctaBg: "#FF7A3D",
+    ctaBg: "#FFB000",
     ctaText: "#0A0B0E",
     url: "proofwright.ai",
     floor: "grid",

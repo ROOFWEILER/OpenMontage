@@ -17,6 +17,7 @@ import { CaptionOverlay, WordCaption } from "./components/CaptionOverlay";
 import { CollageBurst, CollageBurstProps } from "./CollageBurst";
 import { LyricOverlay, LyricOverlayProps } from "./LyricOverlay";
 import { LogoIntro, LogoEndCard } from "./logoStudio/LogoStudio";
+import { ProofWrightLockup, PW_LOCKUP_SIZE } from "./logoStudio/ProofWrightLockup";
 import { ASPECT_SIZES, ENDCARD_FRAMES, INTRO_FRAMES, LOGO_STUDIO_FPS, LogoStudioAspect } from "./logoStudio/brands";
 
 // Logo studio: --props '{"brand":"roofweiler","aspect":"9x16","transparent":false}'
@@ -350,6 +351,14 @@ export const Root: React.FC = () => {
         height={1920}
         calculateMetadata={logoStudioMetadata}
         defaultProps={{ brand: "roofweiler", aspect: "9x16", transparent: false } as LogoStudioCompProps}
+      />
+      <Composition
+        id="LogoStudioProofWrightLockup"
+        component={ProofWrightLockup}
+        durationInFrames={1}
+        fps={LOGO_STUDIO_FPS}
+        width={PW_LOCKUP_SIZE.width}
+        height={PW_LOCKUP_SIZE.height}
       />
       <Composition
         id="LogoEndCard"
