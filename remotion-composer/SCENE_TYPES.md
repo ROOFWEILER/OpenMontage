@@ -79,3 +79,23 @@ Code-drawn, deterministic, $0 per reel. Full-frame overlays on the `TalkingHead`
 | `text_behind` | `TextBehind` | `text` | `subtitle`, `top` (0-1), `fontSize` | Huge title between the background and the presenter (needs `foregroundMatteSrc`; without it, place it above the head) |
 
 **Presenter matte** (`foregroundMatteSrc`): run `bg_remove` on the presenter video — video input writes an alpha VP9 WebM (`{"input_path": "take.mp4", "output_path": "take_matte.webm"}`, needs `pip install rembg`). Overlays with `layer: "behind"` (and every `text_behind`, and the far half of `ui_world`) render under it.
+
+### Style pack 2 (David 2026-10-20): brand-pack overlays
+
+| `type` | Component | Required fields | Common fields | Purpose |
+|---|---|---|---|---|
+| `before_after` | `BeforeAfter` | `beforeSrc`, `afterSrc` | `beforeLabel`, `afterLabel`, `placement` | Wipe from a real "before" photo to the real "after" (Roofweiler). Never a generated after image |
+| `location_pin` | `LocationPin` | `place` | `subtitle`, `mapSrc`, `pinAt`, `placement` | Pin drops on a map card, place name slides in. A city, never an address |
+| `plan_draw` | `PlanDraw` | — | `rooms` [{x,y,w,h,label}], `title`, `dimension`, `highlightRoom` | Floor plan draws itself (Tepui). A diagram, not a permit drawing |
+| `highlighter` | `Highlighter` | `lines`, `highlights` | `title`, `highlightSeconds` | Marker sweeps the key lines of a document card |
+| `step_tracker` | `StepTracker` | `steps` | `title`, `stepSeconds` | Vertical process with a filling progress line |
+| `notification_stack` | `NotificationStack` | `notifications` [{app,title,body,time}] | `itemSeconds`, `top` | iOS-style banners drop and stack (ProofWright). Sample-data amounts only |
+| `headline_wall` | `HeadlineWall` | `headlines` [{source,text}] | `highlightIndex` | Headlines slam onto a wall, camera pulls back. Real, sourced headlines only |
+
+### Motion basics (TalkingHead props, not overlays)
+
+- `punchIns: [{at, duration?, scale?}]` — quick push on the presenter at an emphasis word (default 1.2 s, ×1.12).
+- `transitions: [{at, type: "zoom_through"}]` — whoosh (scale + blur) on everything but the captions, at a beat change.
+- `captionHighlightMode: "kinetic"` — no bar, words pop in as spoken, the spoken word scales up, `emphasis: true` words are bigger in `highlightColor`.
+
+**Variety rule:** everything above is optional. A style card's `style_pack.rotation` says none may repeat from the brand's previous reel (`punch_in` exempt); the content line's gate enforces it.

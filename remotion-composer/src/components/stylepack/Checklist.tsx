@@ -1,5 +1,5 @@
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { StyleTokens, envelope, tokens } from "./shared";
+import { StyleTokens, envelope, onColor, tokens } from "./shared";
 
 /**
  * Checklist — a glass panel whose items tick off one by one: the box pops,
@@ -72,7 +72,7 @@ export const Checklist: React.FC<ChecklistProps> = ({ items, title, itemSeconds,
                   <path
                     d="M10 27 L22 38 L43 14"
                     fill="none"
-                    stroke="#0B0F19"
+                    stroke={onColor(t.accent)}
                     strokeWidth="7"
                     strokeLinecap="round"
                     strokeLinejoin="round"

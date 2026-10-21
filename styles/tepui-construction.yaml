@@ -74,6 +74,7 @@ quality_rules:
   - "Sentence case, no exclamation points"
   - "Every number is sourced in the script"
   - "At most 2 style-pack effects per reel"
+  - "plan_draw is a diagram, never a stamped permit drawing; highlighter shows the script's own words, never a client's document"
 
 chart_palette: ["#0B0B0C", "#737373", "#DC2626"]
 
@@ -84,12 +85,17 @@ color_rules:
 
 style_pack:
   brand: tepui-construction
-  effects_allowed: [checklist, chart_grow]
+  effects_allowed: [checklist, chart_grow, plan_draw, highlighter, step_tracker]
   also_allowed_visuals: ["documents", "plans/diagrams (code-drawn or real document scans)"]
   max_effects_per_reel: 2
+  # Motion basics (pack 2): camera + caption moves, used where they help, never required.
+  motion_allowed: [punch_in, zoom_through, kinetic_captions]
+  # Variety (David 2026-10-20): every effect is optional, and none may repeat from this
+  # brand's previous reel. punch_in is exempt (subtle camera work, not a recognizable look).
+  rotation: {no_repeat_from_last_reels: 1, exempt: [punch_in]}
   presenter: "none (faceless)"
   style_tokens:
-    accentColor: "#DC2626"
+    accentColor: "#0B0B0C"   # ink for effects; red stays reserved for the one CTA
     surfaceColor: "rgba(255, 255, 255, 0.94)"
     textColor: "#0B0B0C"
     mutedColor: "#737373"
