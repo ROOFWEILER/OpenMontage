@@ -99,3 +99,14 @@ Code-drawn, deterministic, $0 per reel. Full-frame overlays on the `TalkingHead`
 - `captionHighlightMode: "kinetic"` — no bar, words pop in as spoken, the spoken word scales up, `emphasis: true` words are bigger in `highlightColor`.
 
 **Variety rule:** everything above is optional. A style card's `style_pack.rotation` says none may repeat from the brand's previous reel (`punch_in` exempt); the content line's gate enforces it.
+
+## Logo studio — 3D brand intro + end card (David 2026-10-21)
+
+Standalone compositions `LogoIntro` (1.2 s) and `LogoEndCard` (2.5 s), built once and reused on every
+reel. Props: `{"brand":"roofweiler|proofwright|tepui-construction|tepui-management|turnkey-crews",
+"aspect":"9x16|1x1|16x9","transparent":false}`. Brand kits (real logo files in `public/logo-studio/`,
+colours, fonts, line, CTA, URL, motion intensity) live in `src/logoStudio/brands.ts`. The 3D is CSS 3D:
+the untouched logo PNG is the front face, darkened copies behind it are the extrusion — free and
+deterministic. Pre-render everything with `scripts/render-logo-studio.sh [OUT_DIR]` (default
+`~/.claude/brands/<brand>/assets/logo-studio/`). The content line appends `endcard-9x16.mp4` in code;
+don't add the card again inside a reel. Only use the intro when the reel's hook doesn't need frame 1.
