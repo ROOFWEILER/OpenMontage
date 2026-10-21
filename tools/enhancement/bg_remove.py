@@ -9,7 +9,8 @@ one rembg session and the result is written as a VP9 WebM with an alpha
 channel — the presenter matte that Remotion's TalkingHead
 `foregroundMatteSrc` draws over "behind" overlays (text-behind-presenter).
 The mask is computed at `mask_scale` of the frame size (faster) and applied
-to the full-resolution frame. Local and free; ~0.1-0.4 s per frame on CPU.
+to the full-resolution frame. Local and free; ~0.5 s per frame (u2net_human_seg,
+CoreML on Apple Silicon), so a 25 s take is a few minutes.
 """
 
 from __future__ import annotations
@@ -207,7 +208,14 @@ class BgRemove(BaseTool):
             return ToolResult(success=False, error=f"ffprobe could not read {input_path}: {probe.stderr[-300:]}")
 
         start = time.time()
-        session = rembg.new_session(model_name)
+        # CoreML (Apple Silicon) is ~2x faster than CPU for these models; CPU is the fallback.
+        try:
+            import onnxruntime
+            providers = [p for p in ("CoreMLExecutionProvider", "CUDAExecutionProvider", "CPUExecutionProvider")
+                         if p in onnxruntime.get_available_providers()]
+        except ImportError:
+            providers = None
+        session = rembg.new_session(model_name, providers=providers) if providers else rembg.new_session(model_name)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         dec = subprocess.Popen(
             ["ffmpeg", "-v", "error", "-i", str(input_path), "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
@@ -227,7 +235,7 @@ class BgRemove(BaseTool):
                 if len(buf) < size:
                     break
                 frame = Image.frombytes("RGB", (w, h), buf)
-                mask = rembg.remove(frame.resize(small, Image.BILINEAR), session=session, only_mask=True)
+                mask = session.predict(frame.resize(small, Image.BILINEAR))[0]
                 mask = mask.convert("L").resize((w, h), Image.BILINEAR)
                 rgba = np.dstack([np.asarray(frame), np.asarray(mask)])
                 enc.stdin.write(rgba.tobytes())

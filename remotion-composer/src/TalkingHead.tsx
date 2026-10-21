@@ -78,6 +78,7 @@ export interface TalkingHeadOverlay {
   valuePrefix?: string;
   valueSuffix?: string;
   highlightIndex?: number;
+  barSeconds?: number[];
   placement?: "lower" | "center" | "upper";
   top?: number;
   /** "behind" = between the background video and the presenter matte. */
@@ -180,6 +181,7 @@ const OverlayContent: React.FC<{ overlay: TalkingHeadOverlay; styleTokens?: Styl
         valuePrefix={overlay.valuePrefix}
         valueSuffix={overlay.valueSuffix}
         highlightIndex={overlay.highlightIndex}
+        barSeconds={overlay.barSeconds}
         position={overlay.placement}
       />
     );

@@ -15,6 +15,7 @@ export interface ChartGrowProps extends StyleTokens {
   valuePrefix?: string; // e.g. "$"
   valueSuffix?: string; // e.g. "%", " hrs"
   highlightIndex?: number;
+  barSeconds?: number[]; // when each bar starts growing (s from the overlay start), to hit the VO
   position?: "lower" | "center" | "upper";
 }
 
@@ -25,6 +26,7 @@ export const ChartGrow: React.FC<ChartGrowProps> = ({
   valuePrefix = "",
   valueSuffix = "",
   highlightIndex,
+  barSeconds,
   position = "lower",
   ...style
 }) => {
@@ -65,7 +67,8 @@ export const ChartGrow: React.FC<ChartGrowProps> = ({
         ) : null}
         <div style={{ display: "flex", alignItems: "flex-end", gap: 26, height: chartH, borderBottom: `3px solid ${t.muted}66` }}>
           {data.map((d, i) => {
-            const grow = spring({ frame: frame - 10 - i * 7, fps, config: { damping: 15, stiffness: 70 } });
+            const start = barSeconds?.[i] != null ? Math.round(barSeconds[i] * fps) : 10 + i * 7;
+            const grow = spring({ frame: frame - start, fps, config: { damping: 15, stiffness: 70 } });
             const h = (d.value / max) * chartH * grow;
             const isHi = i === hi;
             return (
