@@ -1,7 +1,9 @@
 # ProofWright brand style card (David 2026-10-20). Colors/fonts: ProofWright Design System
 # re-lock 2026-08-31 (Research/site/design/ProofWright Design System/tokens/colors.css + fonts.css);
-# the current mark is that system's assets/mark.svg (amber "PW" on ink). The OLD orange
-# pw-logo.png / pw-mark.png (forge #FF5A2C, Fraunces) clash with this palette: never show them.
+# the current mark is the proofwright.ai header logo (David 2026-10-21): amber rounded tile with dark
+# "PW" (Archivo 800) + "Proof" white / "Wright" amber. ~/.claude/brands/proofwright/assets/pw-icon.png
+# (tile), pw-lockup.png (tile + wordmark), remotion-composer/public/logo-studio/proofwright-lockup.png.
+# The orange italic-serif PW (and the ink-circle monogram) are RETIRED: never show them.
 identity:
   name: "ProofWright"
   category: motion-graphics
@@ -79,7 +81,7 @@ overlays:
 quality_rules:
   - "App screens come ONLY from the App Media Library Current set (complete:true, MD5-verified); never redrawn, generated or old screenshots"
   - "Never reveal David owns a roofing company: no Roofweiler/Tepui/Turnkey names, logos, colors or domains on screen"
-  - "Never show the old orange PW logo files; the mark is the amber Archivo mark.svg"
+  - "The PW mark is the amber rounded tile with dark PW (proofwright.ai header); never the old orange italic PW or the ink-circle monogram"
   - "Every number on a chart is sourced in the script; the chart draws only the script's data"
   - "Text inside the 9:16 safe zone; captions stay readable above every effect"
   - "At most 3 style-pack effects per reel, never two at once"
