@@ -91,6 +91,8 @@ style_pack:
   # Variety (David 2026-10-20): every effect is optional, and none may repeat from this
   # brand's previous reel. punch_in is exempt (subtle camera work, not a recognizable look).
   rotation: {no_repeat_from_last_reels: 1, exempt: [punch_in]}
+  # Sound effects (audio.sfx_style "soft tick on checklist marks only"): calm, ticks only.
+  sfx: {volume: 0.75, kinds: [tick]}
   presenter: "never David; faceless or an invented AI presenter labeled AI"
   style_tokens:
     accentColor: "#FFC200"

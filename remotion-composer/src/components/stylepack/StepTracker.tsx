@@ -1,5 +1,6 @@
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { StyleTokens, envelope, onColor, tokens } from "./shared";
+import { Sfx } from "./sfx";
 
 /**
  * StepTracker — a vertical process (permit → demo → rough-in → finish): a
@@ -48,6 +49,7 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ steps, title, stepSeco
           })}
         </div>
       </div>
+      {steps.map((_, i) => <Sfx key={i} kind="tick" frame={at(i)} />)}
     </AbsoluteFill>
   );
 };

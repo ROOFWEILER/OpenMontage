@@ -1,5 +1,6 @@
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { StyleTokens, envelope, tokens } from "./shared";
+import { Sfx } from "./sfx";
 
 /**
  * ChartGrow — bars rise from the baseline one after another, values count up,
@@ -38,6 +39,7 @@ export const ChartGrow: React.FC<ChartGrowProps> = ({
   const hi = highlightIndex ?? data.length - 1;
   const chartH = height * 0.2;
   const top = position === "upper" ? height * 0.08 : position === "center" ? height * 0.28 : height * 0.47;
+  const barStart = (i: number) => (barSeconds?.[i] != null ? Math.round(barSeconds[i] * fps) : 10 + i * 7);
   const decimals = data.some((d) => !Number.isInteger(d.value)) ? 1 : 0;
 
   return (
@@ -67,7 +69,7 @@ export const ChartGrow: React.FC<ChartGrowProps> = ({
         ) : null}
         <div style={{ display: "flex", alignItems: "flex-end", gap: 26, height: chartH, borderBottom: `3px solid ${t.muted}66` }}>
           {data.map((d, i) => {
-            const start = barSeconds?.[i] != null ? Math.round(barSeconds[i] * fps) : 10 + i * 7;
+            const start = barStart(i);
             const grow = spring({ frame: frame - start, fps, config: { damping: 15, stiffness: 70 } });
             const h = (d.value / max) * chartH * grow;
             const isHi = i === hi;
@@ -99,6 +101,7 @@ export const ChartGrow: React.FC<ChartGrowProps> = ({
           ))}
         </div>
       </div>
+      <Sfx kind="swell" frame={Math.min(...data.map((_, i) => barStart(i)))} />
     </AbsoluteFill>
   );
 };
