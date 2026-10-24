@@ -98,7 +98,8 @@ export const LOGO_STUDIO_BRANDS: Record<string, LogoStudioBrand> = {
     display: { family: archivo, weight: 900, uppercase: false, tracking: "-0.01em" },
     body: { family: archivo, weight: 500 },
     line: "Built by an operator.\nProven in production.",
-    cta: "Comment BUILD for your AI build plan",
+    // No cta: the pill carries the URL. "Comment BUILD…" was baked in here until 2026-10-24 —
+    // an end card never carries a comment/DM ask (see END_CARD_ASK_RE below).
     ctaBg: "#FFB000",
     ctaText: "#0A0B0E",
     url: "proofwright.ai",
@@ -166,6 +167,20 @@ export const LOGO_STUDIO_BRANDS: Record<string, LogoStudioBrand> = {
     floor: "stripe",
   },
 };
+
+/**
+ * ⛔ An end card NEVER carries a comment/DM ask (David 2026-10-24). The card is appended to every
+ * reel, so an ask baked in here would dodge the content line's ask gate (no asks before
+ * 2026-11-02, then ~1 in 10 posts, each with its own DM giveaway): the ask lives in the
+ * caption/script only. Same words the gate looks for (~/.claude/skills/content-planner/lib/asks.mjs).
+ * A brand kit that breaks this throws, so the render fails instead of shipping the ask.
+ */
+export const END_CARD_ASK_RE = /\b(comment|comenta|comentar|coment[aá]rio|dm|dms|message us|send us a message|reply|responde|escr[ií]benos|mensaje|link in bio|tell us below|drop a)\b/i;
+for (const [key, b] of Object.entries(LOGO_STUDIO_BRANDS)) {
+  for (const text of [b.line, b.cta ?? ""]) {
+    if (END_CARD_ASK_RE.test(text)) throw new Error(`logo studio: the ${key} end card carries an ask ("${text}"); asks belong in the caption/script, never on the card`);
+  }
+}
 
 export const LOGO_STUDIO_BRAND_KEYS = Object.keys(LOGO_STUDIO_BRANDS);
 

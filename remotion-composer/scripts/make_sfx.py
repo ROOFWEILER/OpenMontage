@@ -114,8 +114,22 @@ def slam():
     return fade(thump + slap, 2)
 
 
+def sting():
+    """Logo end card sting (2.5 s, the card's length): a short air lift into a warm open
+    chord that blooms and then decays slowly to the end, so the card is never silent."""
+    t = t_axis(2.5)
+    lift = bandpass(rng.standard_normal(len(t)), 500 + 1800 * np.clip(t / 0.22, 0, 1), 1.2) * np.clip(t / 0.22, 0, 1) ** 2 * np.exp(-np.clip(t - 0.22, 0, None) / 0.08) * 0.5
+    chord = [(98, 0.55), (147, 0.5), (196, 0.6), (247, 0.4), (294, 0.35), (392, 0.22), (588, 0.1)]
+    pad = sum(a * (np.sin(2 * math.pi * f * t + i) + 0.4 * np.sin(2 * math.pi * f * 1.003 * t + 2 * i)) for i, (f, a) in enumerate(chord))
+    attack = 1 - np.exp(-np.clip(t - 0.12, 0, None) / 0.07)
+    env = attack * np.exp(-np.clip(t - 0.35, 0, None) / 0.95)  # ~ -20 dB by the end, never silent
+    x = lowpass(pad, 900 + 2600 * np.exp(-t / 0.8)) * env + lift
+    x[-int(SR * 0.12):] *= np.linspace(1, 0, int(SR * 0.12))  # soft out, no click at the cut
+    return fade(x, 6)
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    for name, fn in [("tick", tick), ("pop", pop), ("whoosh", whoosh), ("swell", swell), ("slam", slam)]:
+    for name, fn in [("tick", tick), ("pop", pop), ("whoosh", whoosh), ("swell", swell), ("slam", slam), ("sting", sting)]:  # sting LAST: the shared rng keeps the older bytes identical
         write(f"{name}.wav", fn())
         print("wrote", OUT / f"{name}.wav")
