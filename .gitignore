@@ -87,6 +87,9 @@ remotion-composer/projects/
 remotion-composer/public/*
 # But keep demo props (shipped with the project for zero-key demos)
 !remotion-composer/public/demo-props/
+# Logo studio: the brands' real logo files (public marks), used by LogoIntro/LogoEndCard
+!remotion-composer/public/logo-studio/
+!remotion-composer/public/sfx/
 # Ignore test/scratch compositions in demo-props (keep only curated demos)
 remotion-composer/public/demo-props/test-*
 remotion-composer/public/demo-props/talking-head-*

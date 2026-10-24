@@ -896,7 +896,7 @@ class VideoCompose(BaseTool):
         """
 
         staged_by_source: dict[Path, str] = {}
-        media_keys = {"source", "src", "backgroundSrc", "backgroundImage", "backgroundVideo", "images"}
+        media_keys = {"source", "src", "videoSrc", "backgroundSrc", "backgroundImage", "backgroundVideo", "images"}
 
         def visit(node: Any, parent_key: str | None = None) -> Any:
             if isinstance(node, dict):
@@ -1334,9 +1334,11 @@ class VideoCompose(BaseTool):
             # Derive caption colors from the palette
             theme["captionHighlightColor"] = primary
             # Caption background: semi-transparent version of the bg color
+            # Light vs dark by luminance, not a list of exact whites (paper #FAFAF7 is light too).
+            from styles.playbook_loader import _relative_luminance
             theme["captionBackgroundColor"] = (
-                f"rgba(255, 255, 255, 0.85)" if bg.upper() in ("#FFFFFF", "#FAFAFA", "#F9FAFB")
-                else f"rgba(15, 23, 42, 0.75)"
+                "rgba(255, 255, 255, 0.85)" if _relative_luminance(bg) > 0.5
+                else "rgba(15, 23, 42, 0.75)"
             )
 
             # Motion style from playbook. `pace` is an identity field in the

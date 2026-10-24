@@ -1,0 +1,118 @@
+# ProofWright brand style card (David 2026-10-20). Colors/fonts: ProofWright Design System
+# re-lock 2026-08-31 (Research/site/design/ProofWright Design System/tokens/colors.css + fonts.css);
+# the current mark is the proofwright.ai header logo (David 2026-10-21): amber rounded tile with dark
+# "PW" (Archivo 800) + "Proof" white / "Wright" amber. ~/.claude/brands/proofwright/assets/pw-icon.png
+# (tile), pw-lockup.png (tile + wordmark), remotion-composer/public/logo-studio/proofwright-lockup.png.
+# The orange italic-serif PW (and the ink-circle monogram) are RETIRED: never show them.
+identity:
+  name: "ProofWright"
+  category: motion-graphics
+  mood: bold, technical, operator-to-operator, receipts over pitch
+  pace: fast
+  best_for: "ProofWright reels: David's HeyGen twin (Dave office looks) plus real SureWright/ShowWright screens"
+
+visual_language:
+  color_palette:
+    primary: ["#0A0B0E", "#121316"]   # ink ground
+    accent: ["#FFB000", "#5B8CFF"]    # amber = shipped/live/after; blueprint = old way/before
+    background: "#0A0B0E"
+    text: "#F2F3F5"
+    muted: "#8A8F9C"
+  composition: "presenter centre; product on the sides (phone, orbiting UI cards); one idea per beat"
+  texture: "clean dark UI glass, subtle accent glow, no grain"
+
+typography:
+  headings:
+    font: "Archivo"
+    weight: 800
+    tracking: "-0.03em"
+  body:
+    font: "Archivo"
+    weight: 500
+    line_height: 1.3
+  code:
+    font: "JetBrains Mono"
+    weight: 400
+  scale_system: "perfect_fourth"
+  weight_matrix:
+    title: 800
+    heading: 700
+    body: 500
+    caption: 700
+
+motion:
+  transitions: [cut, zoom-through, slide-up]
+  animation_style: "spring entrances with slight overshoot, 3D tilt on devices, idle float"
+  pacing_rules:
+    min_scene_hold_seconds: 1.5
+    max_scene_hold_seconds: 6
+    text_card_hold_seconds: 2.0
+    stat_card_hold_seconds: 2.5
+    transition_duration_seconds: 0.3
+  entrance: "spring rise + settle (devices), word drop (titles), pop + draw (ticks)"
+  exit: "fast fade (8-10 frames)"
+
+audio:
+  voice_style: "David's one cloned voice (HeyGen 'David Villegas v4'), direct, operator register"
+  music_mood: "driving minimal electronic, low under VO"
+  music_volume: 0.08
+  sfx_style: "soft UI ticks on checklist marks, whoosh on device entrances"
+  ducking_threshold_db: -3
+
+asset_generation:
+  image_prompt_prefix: "dark UI, product-led, amber accent on ink, "
+  image_negative_prompt: "roofing company branding, Roofweiler, Tepui, invented company names, orange gradient logo, serif italic logo"
+  diagram_style: "thin lines on ink, amber for the after-state, blueprint blue for the before-state"
+  consistency_anchors:
+    - "Amber #FFB000 only on shipped/live/after states; blueprint #5B8CFF only on old-way/before"
+    - "App screens are real: App Media Library SureWright/ShowWright Current set only"
+    - "Ink #0A0B0E ground, near-white #F2F3F5 text"
+
+overlays:
+  stat_card:
+    bg: "#121316"
+    border: "#FFB000"
+    radius: 24
+  key_term:
+    bg: "#121316"
+    text: "#FFB000"
+    radius: 12
+
+quality_rules:
+  - "App screens come ONLY from the App Media Library Current set (complete:true, MD5-verified); never redrawn, generated or old screenshots"
+  - "Never reveal David owns a roofing company: no Roofweiler/Tepui/Turnkey names, logos, colors or domains on screen"
+  - "The PW mark is the amber rounded tile with dark PW (proofwright.ai header); never the old orange italic PW or the ink-circle monogram"
+  - "Every number on a chart is sourced in the script; the chart draws only the script's data"
+  - "Text inside the 9:16 safe zone; captions stay readable above every effect"
+  - "At most 3 style-pack effects per reel, never two at once"
+  - "notification_stack uses the product's real notification wording with sample-data amounts; headline_wall only real, sourced headlines, no publication logos"
+
+chart_palette: ["#FFB000", "#5B8CFF", "#8A8F9C", "#F2F3F5"]
+
+color_rules:
+  harmony_type: "complementary"
+  contrast_validation: true
+  colorblind_safe: true
+
+# Which style-pack effects this brand may use (remotion-composer TalkingHead overlay types).
+style_pack:
+  brand: proofwright
+  effects_allowed: [phone_mockup, ui_world, checklist, chart_grow, text_behind, notification_stack, headline_wall]
+  max_effects_per_reel: 3
+  # Motion basics (pack 2): camera + caption moves, used where they help, never required.
+  motion_allowed: [punch_in, zoom_through, kinetic_captions]
+  # Variety (David 2026-10-20): every effect is optional, and none may repeat from this
+  # brand's previous reel. punch_in is exempt (subtle camera work, not a recognizable look).
+  rotation: {no_repeat_from_last_reels: 1, exempt: [punch_in]}
+  # Sound effects timed to the motion (audio.sfx_style): TalkingHead sfxVolume / sfxKinds.
+  sfx: {volume: 1.0, kinds: [whoosh, tick, pop, swell, slam]}
+  presenter: "twin (David's HeyGen twin, Dave office look by default)"
+  style_tokens:
+    accentColor: "#FFB000"
+    surfaceColor: "rgba(18, 19, 22, 0.86)"
+    textColor: "#F2F3F5"
+    mutedColor: "#8A8F9C"
+    fontFamily: "Archivo"
+  caption:
+    highlightColor: "#FFB000"
+    fontFamily: "Archivo"

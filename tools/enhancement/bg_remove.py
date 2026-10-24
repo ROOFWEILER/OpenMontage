@@ -3,10 +3,20 @@
 Removes backgrounds from images using the rembg library (U2Net models).
 Outputs transparent PNGs or composites onto a custom background color.
 Supports local execution via rembg and optionally cloud APIs.
+
+Video mode (input_path is .mp4/.mov/.webm/.mkv): every frame is matted with
+one rembg session and the result is written as a VP9 WebM with an alpha
+channel — the presenter matte that Remotion's TalkingHead
+`foregroundMatteSrc` draws over "behind" overlays (text-behind-presenter).
+The mask is computed at `mask_scale` of the frame size (faster) and applied
+to the full-resolution frame. Local and free; ~0.5 s per frame (u2net_human_seg,
+CoreML on Apple Silicon), so a 25 s take is a few minutes.
 """
 
 from __future__ import annotations
 
+import json
+import subprocess
 import time
 from pathlib import Path
 from typing import Any
@@ -22,6 +32,9 @@ from tools.base_tool import (
     ToolStatus,
     ToolTier,
 )
+
+
+VIDEO_SUFFIXES = {".mp4", ".mov", ".webm", ".mkv", ".m4v"}
 
 
 class BgRemove(BaseTool):
@@ -55,7 +68,7 @@ class BgRemove(BaseTool):
         "properties": {
             "input_path": {
                 "type": "string",
-                "description": "Path to image or video frame",
+                "description": "Path to an image, or a video (.mp4/.mov/.webm/.mkv) for an alpha-matte WebM",
             },
             "output_path": {
                 "type": "string",
@@ -75,6 +88,11 @@ class BgRemove(BaseTool):
                 "default": False,
                 "description": "Use alpha matting for finer edges",
             },
+            "mask_scale": {
+                "type": "number",
+                "default": 0.5,
+                "description": "Video mode: compute each mask at this fraction of the frame size",
+            },
         },
     }
 
@@ -82,7 +100,7 @@ class BgRemove(BaseTool):
         cpu_cores=2, ram_mb=2048, vram_mb=0, disk_mb=500
     )
 
-    idempotency_key_fields = ["input_path", "model", "bg_color", "alpha_matting"]
+    idempotency_key_fields = ["input_path", "model", "bg_color", "alpha_matting", "mask_scale"]
     side_effects = ["writes background-removed image to output_path"]
     user_visible_verification = [
         "Inspect output for clean edges around the subject",
@@ -100,6 +118,9 @@ class BgRemove(BaseTool):
         input_path = Path(inputs["input_path"])
         if not input_path.exists():
             return ToolResult(success=False, error=f"Input not found: {input_path}")
+
+        if input_path.suffix.lower() in VIDEO_SUFFIXES:
+            return self._execute_video(input_path, inputs)
 
         output_path = Path(
             inputs.get("output_path", str(input_path.with_stem(f"{input_path.stem}_nobg").with_suffix(".png")))
@@ -158,4 +179,78 @@ class BgRemove(BaseTool):
             },
             artifacts=[str(output_path)],
             duration_seconds=round(elapsed, 2),
+        )
+
+    def _execute_video(self, input_path: Path, inputs: dict[str, Any]) -> ToolResult:
+        """Matte every frame; write a VP9/yuva420p WebM (alpha) at the source fps."""
+        try:
+            import numpy as np
+            import rembg
+            from PIL import Image
+        except ImportError as e:
+            return ToolResult(success=False, error=f"{e.name} is not installed. Run: pip install rembg")
+
+        output_path = Path(inputs.get("output_path") or input_path.with_name(f"{input_path.stem}_matte.webm"))
+        if output_path.suffix.lower() != ".webm":
+            return ToolResult(success=False, error="Video mode writes an alpha WebM: output_path must end in .webm")
+        model_name = inputs.get("model", "u2net_human_seg")
+        scale = float(inputs.get("mask_scale", 0.5))
+
+        probe = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+             "stream=width,height,r_frame_rate", "-of", "json", str(input_path)],
+            capture_output=True, text=True,
+        )
+        try:
+            st = json.loads(probe.stdout)["streams"][0]
+            w, h, fps = int(st["width"]), int(st["height"]), st["r_frame_rate"]
+        except (KeyError, IndexError, ValueError):
+            return ToolResult(success=False, error=f"ffprobe could not read {input_path}: {probe.stderr[-300:]}")
+
+        start = time.time()
+        # CoreML (Apple Silicon) is ~2x faster than CPU for these models; CPU is the fallback.
+        try:
+            import onnxruntime
+            providers = [p for p in ("CoreMLExecutionProvider", "CUDAExecutionProvider", "CPUExecutionProvider")
+                         if p in onnxruntime.get_available_providers()]
+        except ImportError:
+            providers = None
+        session = rembg.new_session(model_name, providers=providers) if providers else rembg.new_session(model_name)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        dec = subprocess.Popen(
+            ["ffmpeg", "-v", "error", "-i", str(input_path), "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+            stdout=subprocess.PIPE,
+        )
+        enc = subprocess.Popen(
+            ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba", "-s", f"{w}x{h}", "-r", fps,
+             "-i", "-", "-c:v", "libvpx-vp9", "-pix_fmt", "yuva420p", "-b:v", "0", "-crf", "30",
+             "-row-mt", "1", "-deadline", "realtime", "-cpu-used", "5", "-auto-alt-ref", "0", str(output_path)],
+            stdin=subprocess.PIPE,
+        )
+        frames, size = 0, w * h * 3
+        small = (max(1, int(w * scale)), max(1, int(h * scale)))
+        try:
+            while True:
+                buf = dec.stdout.read(size)
+                if len(buf) < size:
+                    break
+                frame = Image.frombytes("RGB", (w, h), buf)
+                mask = session.predict(frame.resize(small, Image.BILINEAR))[0]
+                mask = mask.convert("L").resize((w, h), Image.BILINEAR)
+                rgba = np.dstack([np.asarray(frame), np.asarray(mask)])
+                enc.stdin.write(rgba.tobytes())
+                frames += 1
+        finally:
+            enc.stdin.close()
+            enc.wait()
+            dec.wait()
+        if frames == 0 or enc.returncode != 0:
+            return ToolResult(success=False, error=f"matte encode failed (frames={frames}, ffmpeg exit={enc.returncode})")
+
+        return ToolResult(
+            success=True,
+            data={"input": str(input_path), "output": str(output_path), "model": model_name,
+                  "frames": frames, "fps": fps, "mask_scale": scale, "format": "webm/vp9 yuva420p"},
+            artifacts=[str(output_path)],
+            duration_seconds=round(time.time() - start, 2),
         )

@@ -1,0 +1,106 @@
+# Tepui Construction brand style card (David 2026-10-20). Colors/fonts: ~/.claude/brands/
+# tepui-construction/assets/visual-tokens.json (ink/paper, red CTA-only) + the vault brand note;
+# Archivo Black (provisional) + Inter. FACELESS (CLAUDE.local.md, 2026-10-18).
+identity:
+  name: "Tepui Construction"
+  category: motion-graphics
+  mood: craftsman-direct, calm competence, clean explainer
+  pace: moderate
+  best_for: "Faceless Tepui Construction explainers: documents, plans, diagrams, hands, screens, voice-over"
+
+visual_language:
+  color_palette:
+    primary: ["#0B0B0C"]
+    accent: ["#DC2626"]   # CTA moment only
+    background: "#FAFAF7"
+    text: "#0B0B0C"
+    muted: "#737373"
+  composition: "documents and diagrams centred on paper; one clear panel per beat"
+  texture: "paper, plans, warm neutral light; no HDR, no cool grade"
+
+typography:
+  headings:
+    font: "Archivo Black"
+    weight: 400
+    tracking: "-0.01em"
+  body:
+    font: "Inter"
+    weight: 400
+    line_height: 1.45
+  scale_system: "major_third"
+  weight_matrix:
+    title: 400
+    heading: 400
+    body: 400
+    caption: 600
+
+motion:
+  transitions: [cut, fade, slide-left]
+  animation_style: "clean ease-in-out, no bounce"
+  pacing_rules:
+    min_scene_hold_seconds: 2.0
+    max_scene_hold_seconds: 8
+    text_card_hold_seconds: 3.0
+    stat_card_hold_seconds: 3.0
+    transition_duration_seconds: 0.4
+  entrance: "fade-up"
+  exit: "fade-out"
+
+audio:
+  voice_style: "calm, direct, private-client; sentence case energy, no hype"
+  music_mood: "warm minimal piano / soft ambient"
+  music_volume: 0.07
+  sfx_style: "paper and pencil ticks, very subtle"
+  ducking_threshold_db: -3
+
+asset_generation:
+  image_prompt_prefix: "renovation documents, permit plans, hands with a pencil, warm neutral light, "
+  image_negative_prompt: "faces, people looking at camera, presenter, hard hats posing, stock construction cliches, green, cool grade, HDR, pure black"
+  diagram_style: "ink lines on paper #FAFAF7, red #DC2626 only for the one call to action"
+  consistency_anchors:
+    - "Ink #0B0B0C on paper #FAFAF7; red only on the CTA"
+    - "No recognizable face anywhere"
+
+overlays:
+  stat_card:
+    bg: "#FFFFFF"
+    border: "#0B0B0C"
+    radius: 12
+
+quality_rules:
+  - "FACELESS: no David, no AI avatar, no talking head, no recognizable face"
+  - "Never 'our work' or any track-record/portfolio claim; never claim the company's own license as a hook"
+  - "Banned: pure black, green, 'Licensed and insured' as a headline, 'Your dream home starts here', 'Trusted contractor'"
+  - "Sentence case, no exclamation points"
+  - "Every number is sourced in the script"
+  - "At most 2 style-pack effects per reel"
+  - "plan_draw is a diagram, never a stamped permit drawing; highlighter shows the script's own words, never a client's document"
+
+chart_palette: ["#0B0B0C", "#737373", "#DC2626"]
+
+color_rules:
+  harmony_type: "analogous"
+  contrast_validation: true
+  colorblind_safe: true
+
+style_pack:
+  brand: tepui-construction
+  effects_allowed: [phone_mockup, checklist, chart_grow, plan_draw, highlighter, step_tracker]
+  also_allowed_visuals: ["documents", "plans/diagrams (code-drawn or real document scans)"]
+  max_effects_per_reel: 2
+  # Motion basics (pack 2): camera + caption moves, used where they help, never required.
+  motion_allowed: [punch_in, zoom_through, kinetic_captions]
+  # Variety (David 2026-10-20): every effect is optional, and none may repeat from this
+  # brand's previous reel. punch_in is exempt (subtle camera work, not a recognizable look).
+  rotation: {no_repeat_from_last_reels: 1, exempt: [punch_in]}
+  # Sound effects (audio.sfx_style "paper and pencil ticks, very subtle"): ticks only, half level.
+  sfx: {volume: 0.5, kinds: [tick]}
+  presenter: "none (faceless)"
+  style_tokens:
+    accentColor: "#0B0B0C"   # ink for effects; red stays reserved for the one CTA
+    surfaceColor: "rgba(255, 255, 255, 0.94)"
+    textColor: "#0B0B0C"
+    mutedColor: "#737373"
+    fontFamily: "Space Grotesk"   # Archivo Black/Inter are not bundled in the composer yet
+  caption:
+    highlightColor: "#DC2626"

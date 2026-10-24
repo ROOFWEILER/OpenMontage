@@ -221,6 +221,40 @@
         }
       }
     },
+    "style_pack": {
+      "description": "Brand style pack: which remotion-composer style-pack effects (TalkingHead overlay types) this brand may use, and the tokens they render with.",
+      "type": "object",
+      "required": ["brand", "effects_allowed"],
+      "properties": {
+        "brand": { "type": "string" },
+        "effects_allowed": {
+          "type": "array",
+          "items": { "enum": ["phone_mockup", "ui_world", "checklist", "chart_grow", "text_behind", "before_after", "location_pin", "plan_draw", "highlighter", "step_tracker", "notification_stack", "headline_wall"] }
+        },
+        "motion_allowed": {
+          "type": "array",
+          "items": { "enum": ["punch_in", "zoom_through", "kinetic_captions"] }
+        },
+        "rotation": {
+          "type": "object",
+          "properties": { "no_repeat_from_last_reels": { "type": "integer", "minimum": 0 }, "exempt": { "type": "array", "items": { "type": "string" } } }
+        },
+        "max_effects_per_reel": { "type": "integer", "minimum": 0 },
+        "presenter": { "type": "string" },
+        "style_tokens": { "type": "object" },
+        "caption": { "type": "object" },
+        "also_allowed_visuals": { "type": "array", "items": { "type": "string" } },
+        "sfx": {
+          "description": "Style-pack sound effects for this brand: TalkingHead sfxVolume (volume) and sfxKinds (kinds).",
+          "type": "object",
+          "properties": {
+            "volume": { "type": "number", "minimum": 0, "maximum": 2 },
+            "kinds": { "type": "array", "items": { "enum": ["whoosh", "tick", "pop", "swell", "slam"] } }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
     "overrides": {
       "description": "Per-scene palette or rule exceptions. Up to 20% of scenes may intentionally deviate from the playbook for creative impact.",
       "type": "object",

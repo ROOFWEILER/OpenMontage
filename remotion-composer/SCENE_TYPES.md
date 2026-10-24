@@ -63,3 +63,57 @@ Currently only `TerminalScene` exists. The pattern generalizes — likely candid
 - `TicketBoard` — Jira / Linear card moving across columns
 
 Pattern: follow `TerminalScene.tsx` — a `steps` list of timeline primitives, cursor-advancing durations, spring-based reveals, optional non-blocking pills/badges.
+
+---
+
+## Style-pack overlays (TalkingHead, David 2026-10-20)
+
+Code-drawn, deterministic, $0 per reel. Full-frame overlays on the `TalkingHead` composition that run their own enter/exit motion (`src/components/stylepack/`). Brand colors come from the TalkingHead prop `styleTokens` (copy `style_pack.style_tokens` from `styles/<brand>.yaml`); an overlay's `accentColor`/`color`/`backgroundColor` override them. Which brand may use which effect is in each style card's `style_pack.effects_allowed`.
+
+| `type` | Component | Required fields | Common fields | Purpose |
+|---|---|---|---|---|
+| `phone_mockup` | `PhoneMockup` | `screenSrc` (unframed) or `mockupSrc` (framed PNG) | `side` (left/right/center), `label`, `scrollFraction`, `tapAt` [x,y], `tapAtSeconds` | A real app screen in an iPhone that rises in, tilts and floats beside the presenter. Screens ONLY from the App Media Library Current set (`~/.claude/references/app-media-library.md`) |
+| `ui_world` | `UIWorld` | `cards` [{image} or {title, value}] | `layer: "front"` to keep it all in front | App UI cards orbit the presenter; with `foregroundMatteSrc` the far side passes behind them |
+| `checklist` | `Checklist` | `items` | `title`, `itemSeconds` (tick times, s from overlay start), `placement` (lower/center/upper) | Ticks pop and draw one by one |
+| `chart_grow` | `ChartGrow` | `chartData` [{label, value}] | `title`, `headline`, `valuePrefix`, `valueSuffix`, `highlightIndex`, `placement` | Bars grow, values count up, one bar in the accent. Only sourced numbers |
+| `text_behind` | `TextBehind` | `text` | `subtitle`, `top` (0-1), `fontSize` | Huge title between the background and the presenter (needs `foregroundMatteSrc`; without it, place it above the head) |
+
+**Presenter matte** (`foregroundMatteSrc`): run `bg_remove` on the presenter video — video input writes an alpha VP9 WebM (`{"input_path": "take.mp4", "output_path": "take_matte.webm"}`, needs `pip install rembg`). Overlays with `layer: "behind"` (and every `text_behind`, and the far half of `ui_world`) render under it.
+
+### Style pack 2 (David 2026-10-20): brand-pack overlays
+
+| `type` | Component | Required fields | Common fields | Purpose |
+|---|---|---|---|---|
+| `before_after` | `BeforeAfter` | `beforeSrc`, `afterSrc` | `beforeLabel`, `afterLabel`, `placement` | Wipe from a real "before" photo to the real "after" (Roofweiler). Never a generated after image |
+| `location_pin` | `LocationPin` | `place` | `subtitle`, `mapSrc`, `pinAt`, `placement` | Pin drops on a map card, place name slides in. A city, never an address |
+| `plan_draw` | `PlanDraw` | — | `rooms` [{x,y,w,h,label}], `title`, `dimension`, `highlightRoom` | Floor plan draws itself (Tepui). A diagram, not a permit drawing |
+| `highlighter` | `Highlighter` | `lines`, `highlights` | `title`, `highlightSeconds` | Marker sweeps the key lines of a document card |
+| `step_tracker` | `StepTracker` | `steps` | `title`, `stepSeconds` | Vertical process with a filling progress line |
+| `notification_stack` | `NotificationStack` | `notifications` [{app,title,body,time}] | `itemSeconds`, `top` | iOS-style banners drop and stack (ProofWright). Sample-data amounts only |
+| `headline_wall` | `HeadlineWall` | `headlines` [{source,text}] | `highlightIndex` | Headlines slam onto a wall, camera pulls back. Real, sourced headlines only |
+
+### Motion basics (TalkingHead props, not overlays)
+
+- `punchIns: [{at, duration?, scale?}]` — quick push on the presenter at an emphasis word (default 1.2 s, ×1.12).
+- `transitions: [{at, type: "zoom_through"}]` — whoosh (scale + blur) on everything but the captions, at a beat change.
+- `captionHighlightMode: "kinetic"` — no bar, words pop in as spoken, the spoken word scales up, `emphasis: true` words are bigger in `highlightColor`.
+
+### Sound effects (TalkingHead props, David 2026-10-21)
+
+Each effect plays a short sound on the frame it moves, from the same timings as the motion: `zoom_through` → whoosh, `checklist` / `step_tracker` → a soft tick per item, `notification_stack` → a pop per banner, `chart_grow` → one swell as the bars start, `headline_wall` → a light slam per card. Levels sit well under the VO. Sounds are CC0, synthesized by `scripts/make_sfx.py` into `public/sfx/` (license: `public/sfx/LICENSE.md`).
+
+- `sfx: false` — turn every sound effect off (default on).
+- `sfxVolume` / `sfxKinds` — copy from the style card's `style_pack.sfx` (`volume`, `kinds`). ProofWright plays all five; Roofweiler and Tepui Construction play ticks only, quieter.
+
+**Variety rule:** everything above is optional. A style card's `style_pack.rotation` says none may repeat from the brand's previous reel (`punch_in` exempt); the content line's gate enforces it.
+
+## Logo studio — 3D brand intro + end card (David 2026-10-21)
+
+Standalone compositions `LogoIntro` (1.2 s) and `LogoEndCard` (2.5 s), built once and reused on every
+reel. Props: `{"brand":"roofweiler|proofwright|tepui-construction|tepui-management|turnkey-crews",
+"aspect":"9x16|1x1|16x9","transparent":false}`. Brand kits (real logo files in `public/logo-studio/`,
+colours, fonts, line, CTA, URL, motion intensity) live in `src/logoStudio/brands.ts`. The 3D is CSS 3D:
+the untouched logo PNG is the front face, darkened copies behind it are the extrusion — free and
+deterministic. Pre-render everything with `scripts/render-logo-studio.sh [OUT_DIR]` (default
+`~/.claude/brands/<brand>/assets/logo-studio/`). The content line appends `endcard-9x16.mp4` in code;
+don't add the card again inside a reel. Only use the intro when the reel's hook doesn't need frame 1.
