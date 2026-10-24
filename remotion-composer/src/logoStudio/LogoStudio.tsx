@@ -10,6 +10,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { LOGO_STUDIO_BRANDS, LogoAsset, LogoStudioBrand, Intensity } from "./brands";
+import { Sfx } from "../components/stylepack/sfx";
 
 /**
  * Logo studio — a code-drawn 3D logo intro and end card for every brand.
@@ -225,6 +226,8 @@ const rise = (frame: number, start: number, u: number) => {
   return { opacity: t, transform: `translateY(${(1 - t) * 28 * u}px)` };
 };
 
+const STING_GAIN: Record<Intensity, number> = { calm: 0.85, clean: 0.85, bold: 1, industrial: 1 };
+
 export const LogoEndCard: React.FC<LogoStudioProps> = ({ brand, transparent = false }) => {
   const b = getBrand(brand);
   const frame = useCurrentFrame();
@@ -253,6 +256,12 @@ export const LogoEndCard: React.FC<LogoStudioProps> = ({ brand, transparent = fa
 
   return (
     <AbsoluteFill>
+      {/* Sound (2026-10-24): never a silent card. Air lift as the mark lands, the warm sting under
+          the whole card, and a soft pop when the pill rises. Under-the-VO levels from the style pack;
+          calm/clean brands a little quieter. */}
+      <Sfx kind="whoosh" frame={0} gain={0.8 * STING_GAIN[b.intensity]} />
+      <Sfx kind="sting" frame={0} gain={STING_GAIN[b.intensity]} />
+      <Sfx kind="pop" frame={20} gain={0.7 * STING_GAIN[b.intensity]} />
       <Backdrop b={b} cx={width / 2} cy={height * (tall ? 0.3 : 0.32)} u={u} transparent={transparent} reveal={lin} frame={frame} />
       <AbsoluteFill
         style={{

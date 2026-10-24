@@ -8,10 +8,10 @@ import { Audio, Sequence, staticFile } from "remotion";
  * them with `sfxVolume` and limits them with `sfxKinds` (style card
  * `style_pack.sfx`), and TalkingHead `sfx: false` silences them all.
  */
-export type SfxKind = "whoosh" | "tick" | "pop" | "swell" | "slam";
+export type SfxKind = "whoosh" | "tick" | "pop" | "swell" | "slam" | "sting";
 
 /** Base gain per sound (files peak at -3 dBFS); keeps each one under a talking voice. */
-const BASE: Record<SfxKind, number> = { whoosh: 0.22, tick: 0.3, pop: 0.26, swell: 0.16, slam: 0.28 };
+const BASE: Record<SfxKind, number> = { whoosh: 0.22, tick: 0.3, pop: 0.26, swell: 0.16, slam: 0.28, sting: 0.42 };
 
 export interface SfxSettings { enabled: boolean; volume: number; kinds?: SfxKind[] }
 
